@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D40005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10006 /* Assets.xcassets */; };
 		A1B2C3D40000 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10000 /* main.swift */; };
 		A1B2C3D40001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10001 /* AppDelegate.swift */; };
 		A1B2C3D40002 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10002 /* MenuBarController.swift */; };
@@ -22,6 +23,7 @@
 		A1B2C3D10003 /* PresenceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceDetector.swift; sourceTree = "<group>"; };
 		A1B2C3D10004 /* SleepAssertion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepAssertion.swift; sourceTree = "<group>"; };
 		A1B2C3D10005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1B2C3D10006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +48,7 @@
 		A1B2C3D30002 /* Aware */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D10006 /* Assets.xcassets */,
 				A1B2C3D10000 /* main.swift */,
 				A1B2C3D10001 /* AppDelegate.swift */,
 				A1B2C3D10002 /* MenuBarController.swift */,
@@ -122,6 +125,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D40005 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,6 +219,7 @@
 		A1B2C3D30006 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_KEY_LSUIElement = NO;
@@ -240,6 +245,7 @@
 		A1B2C3D30007 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
