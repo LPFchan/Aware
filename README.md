@@ -1,5 +1,9 @@
 # Aware
 
+<p align="center">
+  <img src="assets/icon.png" alt="Aware" width="128" />
+</p>
+
 A macOS menu bar app that keeps your Mac awake by detecting your presence with the FaceTime camera.
 
 ## How It Works
