@@ -28,5 +28,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/Build/Products/Release/Aware.zip
+          body: |
+            Download Aware.zip, unzip, and drag Aware.app to Applications.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
