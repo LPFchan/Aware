@@ -9,6 +9,7 @@
 import AppKit
 import AVFoundation
 import CoreGraphics
+import ServiceManagement
 
 enum DetectionStatus: String {
     case faceDetected = "Face detected"
@@ -128,11 +129,12 @@ final class MenuBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
-        #if DEBUG
-        let debugItem = NSMenuItem(title: "Show Debug Window", action: #selector(showDebugWindow), keyEquivalent: "d")
-        debugItem.target = self
-        menu.addItem(debugItem)
-        #endif
+        if #available(macOS 13.0, *) {
+            let openAtLoginItem = NSMenuItem(title: "Open at Login", action: #selector(toggleOpenAtLogin), keyEquivalent: "")
+            openAtLoginItem.target = self
+            openAtLoginItem.state = (SMAppService.mainApp.status == .enabled) ? .on : .off
+            menu.addItem(openAtLoginItem)
+        }
 
         let quitItem = NSMenuItem(title: "Quit Aware", action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
@@ -156,6 +158,20 @@ final class MenuBarController: NSObject {
                 item.state = item.tag == pollingInterval.rawValue ? .on : .off
             }
         }
+
+        if #available(macOS 13.0, *), let openAtLoginItem = menu.items.first(where: { $0.title == "Open at Login" }) {
+            openAtLoginItem.state = (SMAppService.mainApp.status == .enabled) ? .on : .off
+        }
+    }
+
+    @objc private func toggleOpenAtLogin() {
+        guard #available(macOS 13.0, *) else { return }
+        if SMAppService.mainApp.status == .enabled {
+            try? SMAppService.mainApp.unregister()
+        } else {
+            try? SMAppService.mainApp.register()
+        }
+        updateMenu()
     }
 
     private func onEnabledChanged() {
@@ -271,60 +287,7 @@ final class MenuBarController: NSObject {
         #endif
         NSApplication.shared.terminate(nil)
     }
-
-    #if DEBUG
-    private var debugWindow: NSWindow?
-
-    @objc private func showDebugWindow() {
-        if debugWindow != nil {
-            debugWindow?.orderFrontRegardless()
-            return
-        }
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 320, height: 180),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "Aware Debug"
-        window.isReleasedWhenClosed = false
-        window.center()
-        window.level = .floating
-
-        let text = """
-        Aware is running.
-
-        Status: \(detectionStatus.rawValue)
-        Enabled: \(isEnabled)
-        Polling: \(pollingInterval.rawValue)s
-
-        The menu bar shows a person icon.
-        Look at the top-right of your screen.
-        """
-        let label = NSTextField(labelWithString: text)
-        label.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
-        label.frame = NSRect(x: 20, y: 20, width: 280, height: 140)
-        label.autoresizingMask = [.minYMargin, .minXMargin]
-        window.contentView?.addSubview(label)
-        window.contentView?.frame = NSRect(x: 0, y: 0, width: 320, height: 180)
-
-        debugWindow = window
-        window.delegate = self
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
-    #endif
 }
-
-#if DEBUG
-extension MenuBarController: NSWindowDelegate {
-    func windowWillClose(_ notification: Notification) {
-        if (notification.object as? NSWindow) === debugWindow {
-            debugWindow = nil
-        }
-    }
-}
-#endif
 
 #if DEBUG
 private func debugLog(_ message: String) {
