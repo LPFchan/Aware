@@ -25,10 +25,10 @@ jobs:
           zip -r Aware.zip Aware.app
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/Build/Products/Release/Aware.zip
-          body: |
-            Download Aware.zip, unzip, and drag Aware.app to Applications.
+        run: |
+          gh release create "${GITHUB_REF#refs/tags/}" \
+            build/Build/Products/Release/Aware.zip \
+            --title "Aware ${{ github.ref_name }}" \
+            --notes "Download Aware.zip, unzip, and drag Aware.app to Applications."
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
