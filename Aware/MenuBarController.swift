@@ -31,7 +31,7 @@ enum PollingInterval: Int, CaseIterable {
 }
 
 final class MenuBarController: NSObject {
-    private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let presenceDetector = PresenceDetector()
     private let sleepAssertion = SleepAssertion()
 
@@ -83,11 +83,11 @@ final class MenuBarController: NSObject {
         }
         let image = NSImage(systemSymbolName: "person.crop.circle", accessibilityDescription: "Aware")
         image?.isTemplate = true  // Ensures proper menu bar tinting
+        image?.size = NSSize(width: NSStatusBar.system.thickness, height: NSStatusBar.system.thickness)
         button.image = image
         button.toolTip = "Aware - Click to open menu"
-        // Always show "Aware" text so the menu bar item is visible
-        button.title = "Aware"
         statusItem.menu = buildMenu()
+        statusItem.isVisible = true
         #if DEBUG
         debugLog("Status item configured. Image: \(image != nil), Menu: \(statusItem.menu != nil)")
         #endif
@@ -198,9 +198,8 @@ final class MenuBarController: NSObject {
         let mouseIdle = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .mouseMoved)
         let idleSeconds = min(keyIdle, mouseIdle)
         if idleSeconds < 30.0 {
-            skipLog("Check skipped: recent activity (idle \(String(format: "%.1f", idleSeconds))s < 30s), assuming present")
             DispatchQueue.main.async { [weak self] in
-                self?.sleepAssertion.acquire()
+                _ = self?.sleepAssertion.acquire()
                 self?.detectionStatus = .faceDetected
             }
             return
@@ -216,7 +215,7 @@ final class MenuBarController: NSObject {
     private func handleDetectionResult(_ result: PresenceDetector.Result) {
         switch result {
         case .faceDetected:
-            sleepAssertion.acquire()
+            _ = sleepAssertion.acquire()
             detectionStatus = .faceDetected
         case .noFace:
             sleepAssertion.release()
@@ -299,7 +298,7 @@ final class MenuBarController: NSObject {
         Enabled: \(isEnabled)
         Polling: \(pollingInterval.rawValue)s
 
-        The menu bar item shows "Aware" text.
+        The menu bar shows a person icon.
         Look at the top-right of your screen.
         """
         let label = NSTextField(labelWithString: text)
@@ -326,25 +325,6 @@ extension MenuBarController: NSWindowDelegate {
     }
 }
 #endif
-
-private let awareCaptureLogPath = "/tmp/aware-capture-log.txt"
-
-private func skipLog(_ message: String) {
-    let formatted = "\(ISO8601DateFormatter().string(from: Date())) [Aware] \(message)"
-    print(formatted)
-    NSLog("%@", formatted)
-    if let data = (formatted + "\n").data(using: .utf8) {
-        if FileManager.default.fileExists(atPath: awareCaptureLogPath) {
-            if let handle = FileHandle(forWritingAtPath: awareCaptureLogPath) {
-                handle.seekToEndOfFile()
-                handle.write(data)
-                try? handle.close()
-            }
-        } else {
-            try? data.write(to: URL(fileURLWithPath: awareCaptureLogPath))
-        }
-    }
-}
 
 #if DEBUG
 private func debugLog(_ message: String) {

@@ -1,12 +1,7 @@
-import AppKit
 import AVFoundation
-import CoreImage
 import Foundation
 import ImageIO
-import UniformTypeIdentifiers
 import Vision
-
-private let captureLogPath = "/tmp/aware-capture-log.txt"
 
 /// Returns true if the frame is mostly black (camera warmup). Samples 32BGRA pixels.
 private func isPredominantlyBlack(_ pixelBuffer: CVPixelBuffer) -> Bool {
@@ -31,23 +26,6 @@ private func isPredominantlyBlack(_ pixelBuffer: CVPixelBuffer) -> Bool {
     }
     let avgLuminance = count > 0 ? Double(sum) / Double(count * 3) : 0
     return avgLuminance < 15  // Threshold: 0=black, 255=white
-}
-
-private func captureLog(_ message: String) {
-    let formatted = "\(ISO8601DateFormatter().string(from: Date())) [Aware] \(message)"
-    print(formatted)
-    NSLog("%@", formatted)
-    if let data = (formatted + "\n").data(using: .utf8) {
-        if FileManager.default.fileExists(atPath: captureLogPath) {
-            if let handle = FileHandle(forWritingAtPath: captureLogPath) {
-                handle.seekToEndOfFile()
-                handle.write(data)
-                try? handle.close()
-            }
-        } else {
-            try? data.write(to: URL(fileURLWithPath: captureLogPath))
-        }
-    }
 }
 
 /// Owns AVCaptureSession lifecycle and VNDetectFaceRectanglesRequest execution.
@@ -146,7 +124,6 @@ final class PresenceDetector: NSObject {
 extension PresenceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            captureLog("Captured frame: no pixel buffer → no face")
             finishWith(.noFace)
             return
         }
@@ -154,14 +131,12 @@ extension PresenceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
         // Skip warmup frames — Mac camera often produces 5–15 black frames before valid image
         frameCount += 1
         guard frameCount > 15 else {
-            captureLog("Captured frame: skipped (warmup frame \(frameCount)/15)")
             return  // Don't stop session; wait for camera to produce valid frames
         }
         
         // Discard black frames — average luminance too low means camera not ready yet
         // After 60 frames (~2s), accept whatever we have to avoid waiting forever in dark room
         if frameCount <= 60, isPredominantlyBlack(pixelBuffer) {
-            captureLog("Captured frame: skipped (frame still black, waiting for valid exposure)")
             return
         }
         
@@ -176,7 +151,6 @@ extension PresenceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
         // Try .left first (most Mac FaceTime cameras); then fall back to others
         let orientations: [CGImagePropertyOrientation] = [.left, .up, .down, .right, .leftMirrored, .upMirrored, .downMirrored, .rightMirrored]
         var hasFace = false
-        var workingOrientation: CGImagePropertyOrientation?
         
         for orientation in orientations {
             let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
@@ -184,7 +158,6 @@ extension PresenceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
                 try handler.perform([request])
                 if (request.results?.count ?? 0) >= 1 {
                     hasFace = true
-                    workingOrientation = orientation
                     break
                 }
             } catch {
@@ -192,12 +165,6 @@ extension PresenceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
             }
         }
         
-        let faceCount = request.results?.count ?? 0
-        if let orientation = workingOrientation {
-            captureLog("Captured frame: \(hasFace ? "face detected (\(faceCount) face(s))" : "no face") [orientation: \(orientation)]")
-        } else {
-            captureLog("Captured frame: \(hasFace ? "face detected (\(faceCount) face(s))" : "no face (tried all 8 orientations)")")
-        }
         finishWith(hasFace ? .faceDetected : .noFace)
     }
 }

@@ -10,122 +10,94 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarController: MenuBarController?
     private var launchWindow: NSWindow?
+    private weak var welcomeCheckbox: NSButton?
 
-    private static let logPath: String = {
-        (NSHomeDirectory() as NSString).appendingPathComponent("Desktop/aware-launch-log.txt")
-    }()
-
-    private static func log(_ message: String) {
-        let line = "\(ISO8601DateFormatter().string(from: Date())) \(message)\n"
-        if FileManager.default.fileExists(atPath: logPath) {
-            if let handle = FileHandle(forWritingAtPath: logPath) {
-                handle.seekToEndOfFile()
-                handle.write(line.data(using: .utf8)!)
-                try? handle.close()
-            }
-        } else {
-            try? line.write(toFile: logPath, atomically: true, encoding: .utf8)
-        }
-    }
-
-    func applicationWillFinishLaunching(_ notification: Notification) {
-        Self.log("applicationWillFinishLaunching")
-    }
+    private let hasSeenWelcomeKey = "aware.hasSeenWelcome"
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        Self.log("applicationDidFinishLaunching START")
-
-        // Play system beep so you know something happened (even if alert is on another display)
-        NSSound.beep()
-
-        // Immediate modal alert — blocks until dismissed.
-        NSApp.activate(ignoringOtherApps: true)
-        let alert = NSAlert()
-        alert.messageText = "Aware Launch Diagnostic"
-        alert.informativeText = """
-        If you see this, Aware launched.
-
-        Check your Desktop for aware-launch-log.txt
-        Full path: \(Self.logPath)
-        """
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "OK")
-        alert.runModal()
-
-        Self.log("applicationDidFinishLaunching AFTER alert")
-
-        // Required for menu bar apps: accessory policy allows status item without Dock icon
         NSApp.setActivationPolicy(.accessory)
 
         #if DEBUG
         debugLog("Aware launching...")
         #endif
 
-        menuBarController = MenuBarController()
-        showLaunchWindow()
+        // Defer status item creation so the menu bar is ready (fixes icon not appearing when launched by script)
+        DispatchQueue.main.async { [weak self] in
+            self?.menuBarController = MenuBarController()
+            self?.showWelcomeIfNeeded()
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
     }
 
-    private func showLaunchWindow() {
+    private func showWelcomeIfNeeded() {
+        if UserDefaults.standard.bool(forKey: hasSeenWelcomeKey) { return }
+
         NSApp.activate(ignoringOtherApps: true)
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 360, height: 220),
+            contentRect: NSRect(x: 0, y: 0, width: 320, height: 200),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
         )
-        window.title = "Aware"
+        window.title = "Welcome to Aware"
         window.center()
         window.isReleasedWhenClosed = false
         window.level = .floating
 
         let stack = NSStackView(views: [])
         stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 12
-        stack.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        stack.alignment = .centerX
+        stack.spacing = 8
+        stack.edgeInsets = NSEdgeInsets(top: 16, left: 24, bottom: 16, right: 24)
 
-        let title = NSTextField(labelWithString: "Aware is running")
-        title.font = .boldSystemFont(ofSize: 16)
+        let title = NSTextField(labelWithString: "Welcome to Aware")
+        title.font = .boldSystemFont(ofSize: 15)
+        title.alignment = .center
         stack.addArrangedSubview(title)
 
-        let info = NSTextField(labelWithString: """
-        The menu bar control shows "Aware" or a person icon at the top-right of your screen.
-
-        If you don't see it, click the Control Center icon (two sliders) in the menu bar to reveal hidden items.
-        """)
-        info.font = .systemFont(ofSize: 12)
+        let info = NSTextField(labelWithString: "Aware keeps your display awake by detecting your presence with the FaceTime camera. Click the person icon in the menu bar to enable.")
+        info.font = .systemFont(ofSize: 11)
         info.maximumNumberOfLines = 0
         info.lineBreakMode = .byWordWrapping
+        info.alignment = .center
         info.cell?.truncatesLastVisibleLine = false
-        info.preferredMaxLayoutWidth = 320
+        info.preferredMaxLayoutWidth = 260
         stack.addArrangedSubview(info)
 
-        let dismissButton = NSButton(title: "Dismiss", target: self, action: #selector(dismissLaunchWindow))
+        let checkbox = NSButton(checkboxWithTitle: "Do not show this window again", target: nil, action: nil)
+        stack.addArrangedSubview(checkbox)
+
+        let dismissButton = NSButton(title: "Get Started", target: self, action: #selector(dismissWelcome(_:)))
         dismissButton.bezelStyle = .rounded
         stack.addArrangedSubview(dismissButton)
 
-        let content = NSView(frame: NSRect(x: 0, y: 0, width: 360, height: 220))
+        let content = NSView(frame: NSRect(x: 0, y: 0, width: 320, height: 200))
         window.contentView = content
         content.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: content.topAnchor, constant: 20),
-            stack.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
-            stack.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
+            stack.topAnchor.constraint(equalTo: content.topAnchor, constant: 16),
+            stack.centerXAnchor.constraint(equalTo: content.centerXAnchor),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: content.leadingAnchor, constant: 24),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -24),
         ])
 
+        welcomeCheckbox = checkbox
         launchWindow = window
         window.makeKeyAndOrderFront(nil)
     }
 
-    @objc private func dismissLaunchWindow() {
+    @objc private func dismissWelcome(_ sender: NSButton) {
+        if welcomeCheckbox?.state == .on {
+            UserDefaults.standard.set(true, forKey: hasSeenWelcomeKey)
+        }
         launchWindow?.orderOut(nil)
         launchWindow = nil
+        welcomeCheckbox = nil
     }
 }
 

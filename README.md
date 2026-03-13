@@ -1,29 +1,30 @@
 # Aware
 
-macOS menu bar app that **intelligently** keeps the display awake by **efficiently** detecting your face with the FaceTime camera.
+A macOS menu bar app that keeps your Mac awake by detecting your presence with the FaceTime camera.
 
-## How it works
+## How It Works
 
-- Runs as a menu bar–only app (no Dock icon)
-- Periodically captures a single frame from the FaceTime camera on a configurable interval
-- Uses Vision's face detection to determine presence
-- Skips camera checks when you've recently used the keyboard or mouse (within 30 seconds)
-- Holds a sleep assertion while you're present; releases it when no face is detected
+- **Local & private** — No networking; nothing is sent anywhere. Frames are processed on-device and discarded immediately.
+- **Hardware-accelerated** — Uses Vision on Apple Silicon; face detection runs on GPU/Apple Neural Engine, not CPU.
+- **Smart presence detection** — Skips camera checks when you've used the keyboard or mouse in the last 30 seconds.
+- **Menu bar only** — No Dock icon; runs quietly in the background.
 
-## Requirements
+## Quick Start
 
-- macOS 13+
-- Camera access (granted on first run)
+**Download:** [GitHub Releases](https://github.com/LPFchan/Aware/releases) — download `Aware.zip`, unzip, and drag `Aware.app` to Applications.
 
-## Build & run
-
+**Build from source:**
 ```bash
 xcodebuild -scheme Aware -configuration Debug -derivedDataPath build build
 open build/Build/Products/Debug/Aware.app
 ```
+Or double-click **Launch Aware.command** to build and launch in one step.
 
-Or double-click **Launch Aware.command** after building.
+Grant camera access when prompted, then click the person icon in the menu bar to enable.
 
-## License
+**Create a release:** `git tag v1.0.0 && git push origin v1.0.0` — GitHub Actions builds and attaches `Aware.zip`.
 
-MIT
+## Requirements
+
+- macOS 13+
+- Camera access (requested on first launch)
