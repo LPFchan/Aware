@@ -8,9 +8,9 @@ A macOS menu bar app that keeps your Mac awake by detecting your presence with t
 
 ## How It Works
 
-- **Local & private** — No networking; nothing is sent anywhere. All processing happens locally and discarded immediately.
-- **Hardware-accelerated** — Uses Vision on Apple Silicon; face detection runs on GPU/Apple Neural Engine, not CPU.
-- **Smart presence detection** — Skips camera checks when you've used the keyboard or mouse in the last 30 seconds.
+- **Local & private** — No networking, telemetry, third-party dependencies, or even temp-directory writes; captured frames are processed in memory and discarded immediately.
+- **Hardware-accelerated** — Uses Vision on Apple Silicon; face detection runs on GPU or Apple Neural Engine, not CPU.
+- **Smart presence detection** — Skips camera checks when you've used the keyboard or mouse in the last 30 seconds. Does not consume any power or resource during active use.
 - **Menu bar only** — No Dock icon; runs quietly in the background.
 
 ## Quick Start
