@@ -26,5 +26,9 @@
 	<string>Aware uses your camera to detect when you're present, so it can keep your screen awake while you're at your desk.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUFeedURL</key>
+	<string>https://lpfchan.github.io/Aware/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>KZjcrANd2+I475/JYRziHeQpM+NT9zE6NvD5QWjcozs=</string>
 </dict>
 </plist>

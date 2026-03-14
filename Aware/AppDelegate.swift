@@ -6,30 +6,68 @@
 //
 
 import AppKit
+import Sparkle
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarController: MenuBarController?
     private var launchWindow: NSWindow?
     private weak var welcomeCheckbox: NSButton?
+    private let updaterController: SPUStandardUpdaterController?
 
     private let hasSeenWelcomeKey = "aware.hasSeenWelcome"
+
+    override init() {
+        if Self.hasUpdaterConfiguration {
+            updaterController = SPUStandardUpdaterController(
+                startingUpdater: true,
+                updaterDelegate: nil,
+                userDriverDelegate: nil
+            )
+        } else {
+            updaterController = nil
+        }
+
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
         #if DEBUG
         debugLog("Aware launching...")
+        if updaterController == nil {
+            debugLog("Sparkle updater is disabled because SUPublicEDKey is not configured yet")
+        }
         #endif
 
         // Defer status item creation so the menu bar is ready (fixes icon not appearing when launched by script)
         DispatchQueue.main.async { [weak self] in
-            self?.menuBarController = MenuBarController()
+            self?.menuBarController = MenuBarController(
+                checkForUpdatesTarget: self?.updaterController,
+                checkForUpdatesAction: self?.checkForUpdatesAction
+            )
             self?.showWelcomeIfNeeded()
         }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
+    }
+
+    private var checkForUpdatesAction: Selector? {
+        guard updaterController != nil else { return nil }
+        return #selector(SPUStandardUpdaterController.checkForUpdates(_:))
+    }
+
+    private static var hasUpdaterConfiguration: Bool {
+        guard
+            let infoDictionary = Bundle.main.infoDictionary,
+            let publicKey = (infoDictionary["SUPublicEDKey"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        else {
+            return false
+        }
+
+        return !publicKey.isEmpty
     }
 
     private func showWelcomeIfNeeded() {

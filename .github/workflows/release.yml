@@ -7,28 +7,197 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: macos-14
+    outputs:
+      sparkle_enabled: ${{ steps.sparkle_settings.outputs.enabled }}
+      signing_enabled: ${{ steps.release_settings.outputs.enabled }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Aware
+      - name: Determine optional Apple signing settings
+        id: release_settings
+        env:
+          APPLE_DEVELOPER_ID_CERT_P12: ${{ secrets.APPLE_DEVELOPER_ID_CERT_P12 }}
+          APPLE_DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERT_PASSWORD }}
+          APPLE_DEVELOPER_TEAM_ID: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
+          APPLE_NOTARY_APPLE_ID: ${{ secrets.APPLE_NOTARY_APPLE_ID }}
+          APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
+          APPLE_NOTARY_APP_PASSWORD: ${{ secrets.APPLE_NOTARY_APP_PASSWORD }}
+        run: |
+          if [[ -n "$APPLE_DEVELOPER_ID_CERT_P12" && -n "$APPLE_DEVELOPER_ID_CERT_PASSWORD" && -n "$APPLE_DEVELOPER_TEAM_ID" && -n "$APPLE_NOTARY_APPLE_ID" && -n "$APPLE_NOTARY_APP_PASSWORD" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine Sparkle publishing settings
+        id: sparkle_settings
+        env:
+          ENABLE_SPARKLE_RELEASES: ${{ vars.ENABLE_SPARKLE_RELEASES }}
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+        run: |
+          repo_name="${GITHUB_REPOSITORY#*/}"
+          pages_url="https://${GITHUB_REPOSITORY_OWNER}.github.io/${repo_name}"
+          echo "pages_url=${pages_url}" >> "$GITHUB_OUTPUT"
+
+          if [[ "$ENABLE_SPARKLE_RELEASES" == "true" && -n "$SPARKLE_PRIVATE_ED_KEY" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare release directories
+        run: |
+          mkdir -p build/release build/signing
+
+      - name: Import Developer ID certificate
+        if: steps.release_settings.outputs.enabled == 'true'
+        env:
+          APPLE_DEVELOPER_ID_CERT_P12: ${{ secrets.APPLE_DEVELOPER_ID_CERT_P12 }}
+          APPLE_DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/aware-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          CERT_PATH="$RUNNER_TEMP/developer-id.p12"
+
+          if base64 --help 2>&1 | grep -q -- '--decode'; then
+            printf '%s' "$APPLE_DEVELOPER_ID_CERT_P12" | base64 --decode > "$CERT_PATH"
+          else
+            printf '%s' "$APPLE_DEVELOPER_ID_CERT_P12" | base64 -D > "$CERT_PATH"
+          fi
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$APPLE_DEVELOPER_ID_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security find-identity -v "$KEYCHAIN_PATH"
+
+      - name: Build hobby/private release
+        if: steps.release_settings.outputs.enabled != 'true'
         run: |
           xcodebuild -scheme Aware -configuration Release -derivedDataPath build \
             build -quiet
 
-      - name: Create zip
+      - name: Archive Apple-signed release
+        if: steps.release_settings.outputs.enabled == 'true'
+        env:
+          APPLE_DEVELOPER_TEAM_ID: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
         run: |
-          cd build/Build/Products/Release
-          zip -r Aware.zip Aware.app
+          cat > build/signing/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>developer-id</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>teamID</key>
+              <string>${APPLE_DEVELOPER_TEAM_ID}</string>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild -scheme Aware -configuration Release \
+            -archivePath build/signing/Aware.xcarchive \
+            DEVELOPMENT_TEAM="$APPLE_DEVELOPER_TEAM_ID" \
+            archive -quiet
+
+          xcodebuild -exportArchive \
+            -archivePath build/signing/Aware.xcarchive \
+            -exportPath build/signing/exported \
+            -exportOptionsPlist build/signing/ExportOptions.plist \
+            -quiet
+
+      - name: Verify signed app
+        if: steps.release_settings.outputs.enabled == 'true'
+        run: |
+          codesign --verify --deep --strict build/signing/exported/Aware.app
+
+      - name: Notarize and staple app
+        if: steps.release_settings.outputs.enabled == 'true'
+        env:
+          APPLE_NOTARY_APPLE_ID: ${{ secrets.APPLE_NOTARY_APPLE_ID }}
+          APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
+          APPLE_DEVELOPER_TEAM_ID: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
+          APPLE_NOTARY_APP_PASSWORD: ${{ secrets.APPLE_NOTARY_APP_PASSWORD }}
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/signing/exported/Aware.app \
+            build/signing/Aware-notary.zip
+
+          xcrun notarytool submit build/signing/Aware-notary.zip \
+            --apple-id "$APPLE_NOTARY_APPLE_ID" \
+            --team-id "${APPLE_NOTARY_TEAM_ID:-$APPLE_DEVELOPER_TEAM_ID}" \
+            --password "$APPLE_NOTARY_APP_PASSWORD" \
+            --wait
+
+          xcrun stapler staple build/signing/exported/Aware.app
+          xcrun stapler validate build/signing/exported/Aware.app
+
+      - name: Package hobby/private update archive
+        if: steps.release_settings.outputs.enabled != 'true'
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/Build/Products/Release/Aware.app \
+            build/release/Aware.zip
+
+      - name: Package Apple-signed update archive
+        if: steps.release_settings.outputs.enabled == 'true'
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/signing/exported/Aware.app \
+            build/release/Aware.zip
 
       - name: Create Release
         run: |
           gh release create "${GITHUB_REF#refs/tags/}" \
-            build/Build/Products/Release/Aware.zip \
+            build/release/Aware.zip \
             --title "Aware ${{ github.ref_name }}" \
-            --notes "Download Aware.zip, unzip, and drag Aware.app to Applications."
+            --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate appcast site
+        if: steps.sparkle_settings.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+          DOWNLOAD_URL_PREFIX: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}
+          EXISTING_APPCAST_URL: ${{ steps.sparkle_settings.outputs.pages_url }}/appcast.xml
+          FULL_RELEASE_NOTES_URL: https://github.com/${{ github.repository }}/releases
+          PROJECT_URL: https://github.com/${{ github.repository }}
+        run: |
+          mkdir -p build/release-metadata build/appcast-site
+          gh release view "${GITHUB_REF#refs/tags/}" --json body --jq .body > build/release-metadata/Aware.md
+          chmod +x scripts/generate-sparkle-appcast.sh
+          touch build/appcast-site/.nojekyll
+          scripts/generate-sparkle-appcast.sh \
+            build/release/Aware.zip \
+            build/appcast-site \
+            build/release-metadata/Aware.md
+
+      - name: Upload appcast artifact
+        if: steps.sparkle_settings.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/appcast-site
+
+  deploy-appcast:
+    if: needs.build.outputs.sparkle_enabled == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy appcast to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,116 @@
+# Sparkle Setup
+
+This repository now includes the application-side Sparkle 2 integration, GitHub Pages appcast publishing, and an optional Developer ID signing plus notarization path in GitHub Actions.
+
+The intended default is hobby or private distribution without a paid Apple Developer account.
+
+That means:
+
+1. Sparkle signs and verifies updates using its own EdDSA keypair.
+2. GitHub Releases hosts `Aware.zip`.
+3. GitHub Pages hosts `appcast.xml`.
+4. Apple Developer ID signing and notarization are optional, not required for the updater to function.
+
+The updater only needs two things to work:
+
+1. `SUPublicEDKey` in [Aware/Info.plist](../Aware/Info.plist)
+2. A reachable appcast at the configured `SUFeedURL`
+
+## Default Setup
+
+1. Generate a Sparkle EdDSA key pair on a trusted Mac:
+
+```bash
+build/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys
+```
+
+2. Copy the printed public key into `SUPublicEDKey` in [Aware/Info.plist](../Aware/Info.plist).
+3. Export or otherwise capture the matching private key and store it as the GitHub Actions secret `SPARKLE_PRIVATE_ED_KEY`.
+4. Enable GitHub Pages for this repository.
+5. Add the repository variable `ENABLE_SPARKLE_RELEASES=true` once Pages is ready and the secret is present.
+
+To export the private key from your Keychain into a temporary file:
+
+```bash
+build/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys -x /tmp/aware-sparkle-private-key.txt
+cat /tmp/aware-sparkle-private-key.txt
+```
+
+Then store it in GitHub Actions using one of these methods:
+
+```bash
+gh secret set SPARKLE_PRIVATE_ED_KEY < /tmp/aware-sparkle-private-key.txt
+```
+
+Or in the GitHub web UI:
+
+1. Open the repository on GitHub.
+2. Go to Settings > Secrets and variables > Actions.
+3. Click New repository secret.
+4. Set the name to `SPARKLE_PRIVATE_ED_KEY`.
+5. Paste the full contents of `/tmp/aware-sparkle-private-key.txt` as the value.
+
+After saving the secret, delete the temporary export file:
+
+```bash
+rm /tmp/aware-sparkle-private-key.txt
+```
+
+The workflow computes the default appcast URL as `https://<owner>.github.io/<repo>/appcast.xml`. If the repository is published somewhere else, update `SUFeedURL` in [Aware/Info.plist](../Aware/Info.plist).
+
+## Default Release Behavior
+
+Tagged releases always create `Aware.zip` on GitHub Releases.
+
+When `ENABLE_SPARKLE_RELEASES=true` and `SPARKLE_PRIVATE_ED_KEY` is configured, the release workflow additionally:
+
+1. Reads the GitHub Release body for the current tag.
+2. Generates an embedded-release-notes Sparkle appcast that points downloads at the GitHub Release asset URL.
+3. Publishes the generated `appcast.xml` to GitHub Pages.
+
+This path does not require a paid Apple Developer account.
+
+The appcast generation intentionally disables delta updates for now so the workflow only needs to publish the release archive and the appcast.
+
+## Limitations Without Apple Notarization
+
+Sparkle can still download and verify updates, but macOS trust and Gatekeeper behavior are less smooth.
+
+Expect some or all of the following for hobby or private distribution:
+
+1. Users may need to manually bypass Gatekeeper on first launch.
+2. Unsigned or ad hoc signed builds may trigger more warnings when downloaded from the internet.
+3. Auto-updates are less suitable for broad public distribution because install and relaunch behavior is less predictable under quarantine and trust checks.
+
+For private use, friend-and-family testing, or your own machines, this is usually acceptable.
+
+## Optional Apple Production Setup
+
+Add Apple release secrets if you want CI to produce signed and notarized release builds:
+
+```text
+APPLE_DEVELOPER_ID_CERT_P12
+APPLE_DEVELOPER_ID_CERT_PASSWORD
+APPLE_DEVELOPER_TEAM_ID
+APPLE_NOTARY_APPLE_ID
+APPLE_NOTARY_TEAM_ID
+APPLE_NOTARY_APP_PASSWORD
+```
+
+`APPLE_DEVELOPER_ID_CERT_P12` should be the base64-encoded contents of a `.p12` file containing your `Developer ID Application` certificate.
+
+When the Apple signing secrets are configured, the workflow additionally:
+
+1. Imports the Developer ID certificate into a temporary keychain on the GitHub runner.
+2. Archives and exports a Developer ID-signed app.
+3. Notarizes the app with `notarytool`, staples the notarization ticket, and only then packages the final `Aware.zip`.
+
+## Notes
+
+If the Apple signing secrets are absent, releases still follow the default hobby/private path. That is now the intended baseline, not a temporary fallback.
+
+Recommended follow-up additions:
+
+1. Replace the placeholder `SUFeedURL` in [Aware/Info.plist](../Aware/Info.plist) if your GitHub Pages URL differs from the default repository path.
+2. Turn on `ENABLE_SPARKLE_RELEASES=true` only after Pages is live and the Sparkle private key secret is stored.
+3. If you later want frictionless public distribution, add the Apple secrets and enable the notarized path without changing the Sparkle feed setup.

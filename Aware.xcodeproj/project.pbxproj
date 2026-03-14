@@ -13,6 +13,7 @@
 		A1B2C3D40002 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10002 /* MenuBarController.swift */; };
 		A1B2C3D40003 /* PresenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10003 /* PresenceDetector.swift */; };
 		A1B2C3D40004 /* SleepAssertion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10004 /* SleepAssertion.swift */; };
+		E1F2A3B40000 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E1F2A3B40002 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1F2A3B40000 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +85,9 @@
 			dependencies = (
 			);
 			name = Aware;
+			packageProductDependencies = (
+				E1F2A3B40002 /* Sparkle */,
+			);
 			productName = Aware;
 			productReference = A1B2C3D00001 /* Aware.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +116,9 @@
 				Base,
 			);
 			mainGroup = A1B2C3D30001;
+			packageReferences = (
+				E1F2A3B40001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = A1B2C3D30003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -224,7 +232,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_KEY_LSUIElement = NO;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -234,7 +242,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aware.menubar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -249,7 +257,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -259,7 +267,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aware.menubar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -289,6 +297,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E1F2A3B40001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E1F2A3B40002 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1F2A3B40001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A1B2C3D20006 /* Project object */;
 }

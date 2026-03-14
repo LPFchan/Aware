@@ -26,7 +26,15 @@ Or double-click **Launch Aware.command** to build and launch in one step.
 
 Grant camera access when prompted, then click the person icon in the menu bar to enable.
 
-**Create a release:** `git tag v1.0.0 && git push origin v1.0.0` — GitHub Actions builds and attaches `Aware.zip`.
+**Create a release:** `git tag v1.3 && git push origin v1.3` — GitHub Actions builds and attaches `Aware.zip`.
+
+## Updates
+
+Sparkle 2 is wired for the direct-download build.
+
+- The default setup is hobby or private distribution using Sparkle's own signing, GitHub Releases, and GitHub Pages.
+- Apple Developer signing and notarization are optional hardening for broader public distribution.
+- Maintainer setup steps are documented in [docs/SPARKLE_SETUP.md](docs/SPARKLE_SETUP.md).
 
 ## Requirements
 

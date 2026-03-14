@@ -35,6 +35,8 @@ final class MenuBarController: NSObject {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let presenceDetector = PresenceDetector()
     private let sleepAssertion = SleepAssertion()
+    private let checkForUpdatesTarget: AnyObject?
+    private let checkForUpdatesAction: Selector?
 
     private var pollingTimer: DispatchSourceTimer?
     private let timerQueue = DispatchQueue(label: "com.aware.timer", qos: .userInitiated)
@@ -60,7 +62,9 @@ final class MenuBarController: NSObject {
         set { defaults.set(newValue.rawValue, forKey: intervalKey); restartPollingTimer() }
     }
 
-    override init() {
+    init(checkForUpdatesTarget: AnyObject? = nil, checkForUpdatesAction: Selector? = nil) {
+        self.checkForUpdatesTarget = checkForUpdatesTarget
+        self.checkForUpdatesAction = checkForUpdatesAction
         super.init()
         #if DEBUG
         debugLog("MenuBarController init started")
@@ -126,6 +130,13 @@ final class MenuBarController: NSObject {
         let intervalParent = NSMenuItem(title: "Polling interval", action: nil, keyEquivalent: "")
         intervalParent.submenu = intervalMenu
         menu.addItem(intervalParent)
+
+        menu.addItem(NSMenuItem.separator())
+
+        let checkForUpdatesItem = NSMenuItem(title: "Check for Updates...", action: checkForUpdatesAction, keyEquivalent: "")
+        checkForUpdatesItem.target = checkForUpdatesTarget
+        checkForUpdatesItem.isEnabled = checkForUpdatesTarget != nil && checkForUpdatesAction != nil
+        menu.addItem(checkForUpdatesItem)
 
         menu.addItem(NSMenuItem.separator())
 
