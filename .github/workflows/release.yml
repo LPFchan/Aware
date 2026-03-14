@@ -170,7 +170,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
-          DOWNLOAD_URL_PREFIX: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}
+          DOWNLOAD_URL_PREFIX: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/
           EXISTING_APPCAST_URL: ${{ steps.sparkle_settings.outputs.pages_url }}/appcast.xml
           FULL_RELEASE_NOTES_URL: https://github.com/${{ github.repository }}/releases
           PROJECT_URL: https://github.com/${{ github.repository }}

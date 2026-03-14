@@ -1,0 +1,63 @@
+name: Publish Appcast
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to publish in the appcast, for example v1.3
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-appcast:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve Sparkle tools
+        run: |
+          xcodebuild -resolvePackageDependencies -project Aware.xcodeproj -scheme Aware -quiet
+
+      - name: Download release asset and notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p build/release build/release-metadata build/appcast-site
+          gh release download "${{ inputs.release_tag }}" --pattern 'Aware.zip' --dir build/release
+          gh release view "${{ inputs.release_tag }}" --json body --jq .body > build/release-metadata/Aware.md
+
+      - name: Generate appcast site
+        env:
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+          DOWNLOAD_URL_PREFIX: https://github.com/${{ github.repository }}/releases/download/${{ inputs.release_tag }}/
+          EXISTING_APPCAST_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/appcast.xml
+          FULL_RELEASE_NOTES_URL: https://github.com/${{ github.repository }}/releases
+          PROJECT_URL: https://github.com/${{ github.repository }}
+        run: |
+          chmod +x scripts/generate-sparkle-appcast.sh
+          touch build/appcast-site/.nojekyll
+          scripts/generate-sparkle-appcast.sh \
+            build/release/Aware.zip \
+            build/appcast-site \
+            build/release-metadata/Aware.md
+
+      - name: Upload appcast artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/appcast-site
+
+  deploy-appcast:
+    needs: build-appcast
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy appcast to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
