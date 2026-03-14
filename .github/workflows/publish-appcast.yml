@@ -21,7 +21,7 @@ jobs:
 
       - name: Resolve Sparkle tools
         run: |
-          xcodebuild -resolvePackageDependencies -project Aware.xcodeproj -scheme Aware -quiet
+          xcodebuild -resolvePackageDependencies -project Aware.xcodeproj -scheme Aware -derivedDataPath build -quiet
 
       - name: Download release asset and notes
         env:
