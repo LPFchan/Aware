@@ -28,14 +28,6 @@ Grant camera access when prompted, then click the person icon in the menu bar to
 
 **Create a release:** `git tag vX.Y && git push origin vX.Y` — GitHub Actions builds and attaches `Aware.zip`.
 
-## Updates
-
-Sparkle 2 is wired for the direct-download build.
-
-- The default setup is hobby or private distribution using Sparkle's own signing, GitHub Releases, and GitHub Pages.
-- Apple Developer signing and notarization are optional hardening for broader public distribution.
-- Maintainer setup steps are documented in [docs/SPARKLE_SETUP.md](docs/SPARKLE_SETUP.md).
-
 ## Requirements
 
 - macOS 13+
