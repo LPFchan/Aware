@@ -26,7 +26,7 @@ Or double-click **Launch Aware.command** to build and launch in one step.
 
 Grant camera access when prompted, then click the person icon in the menu bar to enable.
 
-**Create a release:** `git tag v1.3 && git push origin v1.3` — GitHub Actions builds and attaches `Aware.zip`.
+**Create a release:** `git tag v1.4 && git push origin v1.4` — GitHub Actions builds and attaches `Aware.zip`.
 
 ## Updates
 

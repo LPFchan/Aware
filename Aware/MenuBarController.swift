@@ -14,6 +14,7 @@ import ServiceManagement
 enum DetectionStatus: String {
     case faceDetected = "Face detected"
     case noFace = "No face"
+    case paused = "Paused (display asleep)"
     case disabled = "Disabled"
 }
 
@@ -40,6 +41,7 @@ final class MenuBarController: NSObject {
 
     private var pollingTimer: DispatchSourceTimer?
     private let timerQueue = DispatchQueue(label: "com.aware.timer", qos: .userInitiated)
+    private var isDisplaySleeping = false
 
     private(set) var detectionStatus: DetectionStatus = .disabled {
         didSet { updateMenu() }
@@ -69,6 +71,7 @@ final class MenuBarController: NSObject {
         #if DEBUG
         debugLog("MenuBarController init started")
         #endif
+        registerForDisplayNotifications()
         setupStatusItem()
         updateMenu()
         if isEnabled {
@@ -77,6 +80,10 @@ final class MenuBarController: NSObject {
         #if DEBUG
         debugLog("MenuBarController init complete. Status item button exists: \(statusItem.button != nil)")
         #endif
+    }
+
+    deinit {
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
     }
 
     private func setupStatusItem() {
@@ -185,11 +192,28 @@ final class MenuBarController: NSObject {
         updateMenu()
     }
 
+    private func registerForDisplayNotifications() {
+        let notificationCenter = NSWorkspace.shared.notificationCenter
+        notificationCenter.addObserver(
+            self,
+            selector: #selector(handleDisplaySleep),
+            name: NSWorkspace.screensDidSleepNotification,
+            object: nil
+        )
+        notificationCenter.addObserver(
+            self,
+            selector: #selector(handleDisplayWake),
+            name: NSWorkspace.screensDidWakeNotification,
+            object: nil
+        )
+    }
+
     private func onEnabledChanged() {
         if isEnabled {
             startPolling()
         } else {
             stopPolling()
+            presenceDetector.cancelPendingCapture()
             sleepAssertion.release()
             detectionStatus = .disabled
         }
@@ -197,6 +221,10 @@ final class MenuBarController: NSObject {
     }
 
     private func startPolling() {
+        guard isEnabled, !isDisplaySleeping else {
+            detectionStatus = isEnabled ? .paused : .disabled
+            return
+        }
         stopPolling()
         pollingTimer = DispatchSource.makeTimerSource(queue: timerQueue)
         pollingTimer?.schedule(deadline: .now(), repeating: .seconds(pollingInterval.rawValue))
@@ -213,13 +241,15 @@ final class MenuBarController: NSObject {
     }
 
     private func restartPollingTimer() {
-        if isEnabled {
+        if isEnabled, !isDisplaySleeping {
             startPolling()
         }
         updateMenu()
     }
 
     private func performDetection() {
+        guard isEnabled, !isDisplaySleeping else { return }
+
         // Skip camera check when user has recent keyboard/mouse activity — assume present
         let keyIdle = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .keyDown)
         let mouseIdle = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .mouseMoved)
@@ -240,6 +270,8 @@ final class MenuBarController: NSObject {
     }
 
     private func handleDetectionResult(_ result: PresenceDetector.Result) {
+        guard isEnabled, !isDisplaySleeping else { return }
+
         switch result {
         case .faceDetected:
             _ = sleepAssertion.acquire()
@@ -262,6 +294,25 @@ final class MenuBarController: NSObject {
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+
+    @objc private func handleDisplaySleep() {
+        isDisplaySleeping = true
+        stopPolling()
+        presenceDetector.cancelPendingCapture()
+        sleepAssertion.release()
+        if isEnabled {
+            detectionStatus = .paused
+        }
+    }
+
+    @objc private func handleDisplayWake() {
+        isDisplaySleeping = false
+        if isEnabled {
+            startPolling()
+        } else {
+            detectionStatus = .disabled
+        }
     }
 
     @objc private func toggleEnabled() {

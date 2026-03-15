@@ -46,6 +46,13 @@ final class PresenceDetector: NSObject {
     override init() {
         super.init()
     }
+
+    /// Stops any in-flight capture without reporting a detection result.
+    func cancelPendingCapture() {
+        workQueue.async { [weak self] in
+            self?.finishWith(nil)
+        }
+    }
     
     /// Captures a single frame and runs face detection. Completion is called on the main queue.
     func checkForPresence(completion: @escaping (Result) -> Void) {
@@ -107,7 +114,7 @@ final class PresenceDetector: NSObject {
         session.startRunning()
     }
     
-    private func finishWith(_ result: Result) {
+    private func finishWith(_ result: Result?) {
         session.stopRunning()
         if let input = session.inputs.first {
             session.removeInput(input)
@@ -115,7 +122,9 @@ final class PresenceDetector: NSObject {
         session.outputs.forEach { session.removeOutput($0) }
         
         DispatchQueue.main.async { [weak self] in
-            self?.captureCompletion?(result)
+            if let result {
+                self?.captureCompletion?(result)
+            }
             self?.captureCompletion = nil
         }
     }
