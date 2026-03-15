@@ -11,10 +11,13 @@ import AVFoundation
 import CoreGraphics
 import ServiceManagement
 
+private let screenSaverDidStartNotification = Notification.Name("com.apple.screensaver.didstart")
+private let screenSaverDidStopNotification = Notification.Name("com.apple.screensaver.didstop")
+
 enum DetectionStatus: String {
     case faceDetected = "Face detected"
     case noFace = "No face"
-    case paused = "Paused (display asleep)"
+    case paused = "Paused"
     case disabled = "Disabled"
 }
 
@@ -42,6 +45,7 @@ final class MenuBarController: NSObject {
     private var pollingTimer: DispatchSourceTimer?
     private let timerQueue = DispatchQueue(label: "com.aware.timer", qos: .userInitiated)
     private var isDisplaySleeping = false
+    private var isScreenSaverActive = false
 
     private(set) var detectionStatus: DetectionStatus = .disabled {
         didSet { updateMenu() }
@@ -71,7 +75,7 @@ final class MenuBarController: NSObject {
         #if DEBUG
         debugLog("MenuBarController init started")
         #endif
-        registerForDisplayNotifications()
+        registerForPowerStateNotifications()
         setupStatusItem()
         updateMenu()
         if isEnabled {
@@ -84,6 +88,7 @@ final class MenuBarController: NSObject {
 
     deinit {
         NSWorkspace.shared.notificationCenter.removeObserver(self)
+        DistributedNotificationCenter.default().removeObserver(self)
     }
 
     private func setupStatusItem() {
@@ -192,19 +197,39 @@ final class MenuBarController: NSObject {
         updateMenu()
     }
 
-    private func registerForDisplayNotifications() {
-        let notificationCenter = NSWorkspace.shared.notificationCenter
-        notificationCenter.addObserver(
+    private var isPollingPaused: Bool {
+        isDisplaySleeping || isScreenSaverActive
+    }
+
+    private func registerForPowerStateNotifications() {
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+        workspaceCenter.addObserver(
             self,
             selector: #selector(handleDisplaySleep),
             name: NSWorkspace.screensDidSleepNotification,
             object: nil
         )
-        notificationCenter.addObserver(
+        workspaceCenter.addObserver(
             self,
             selector: #selector(handleDisplayWake),
             name: NSWorkspace.screensDidWakeNotification,
             object: nil
+        )
+
+        let distributedCenter = DistributedNotificationCenter.default()
+        distributedCenter.addObserver(
+            self,
+            selector: #selector(handleScreenSaverStart),
+            name: screenSaverDidStartNotification,
+            object: nil,
+            suspensionBehavior: .deliverImmediately
+        )
+        distributedCenter.addObserver(
+            self,
+            selector: #selector(handleScreenSaverStop),
+            name: screenSaverDidStopNotification,
+            object: nil,
+            suspensionBehavior: .deliverImmediately
         )
     }
 
@@ -212,16 +237,14 @@ final class MenuBarController: NSObject {
         if isEnabled {
             startPolling()
         } else {
-            stopPolling()
-            presenceDetector.cancelPendingCapture()
-            sleepAssertion.release()
+            pausePolling(setStatus: false)
             detectionStatus = .disabled
         }
         updateMenu()
     }
 
     private func startPolling() {
-        guard isEnabled, !isDisplaySleeping else {
+        guard isEnabled, !isPollingPaused else {
             detectionStatus = isEnabled ? .paused : .disabled
             return
         }
@@ -240,15 +263,24 @@ final class MenuBarController: NSObject {
         pollingTimer = nil
     }
 
+    private func pausePolling(setStatus: Bool) {
+        stopPolling()
+        presenceDetector.cancelPendingCapture()
+        sleepAssertion.release()
+        if setStatus, isEnabled {
+            detectionStatus = .paused
+        }
+    }
+
     private func restartPollingTimer() {
-        if isEnabled, !isDisplaySleeping {
+        if isEnabled, !isPollingPaused {
             startPolling()
         }
         updateMenu()
     }
 
     private func performDetection() {
-        guard isEnabled, !isDisplaySleeping else { return }
+        guard isEnabled, !isPollingPaused else { return }
 
         // Skip camera check when user has recent keyboard/mouse activity — assume present
         let keyIdle = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .keyDown)
@@ -270,7 +302,7 @@ final class MenuBarController: NSObject {
     }
 
     private func handleDetectionResult(_ result: PresenceDetector.Result) {
-        guard isEnabled, !isDisplaySleeping else { return }
+        guard isEnabled, !isPollingPaused else { return }
 
         switch result {
         case .faceDetected:
@@ -298,19 +330,28 @@ final class MenuBarController: NSObject {
 
     @objc private func handleDisplaySleep() {
         isDisplaySleeping = true
-        stopPolling()
-        presenceDetector.cancelPendingCapture()
-        sleepAssertion.release()
-        if isEnabled {
-            detectionStatus = .paused
-        }
+        pausePolling(setStatus: true)
     }
 
     @objc private func handleDisplayWake() {
         isDisplaySleeping = false
-        if isEnabled {
+        if isEnabled, !isPollingPaused {
             startPolling()
         } else {
+            detectionStatus = .disabled
+        }
+    }
+
+    @objc private func handleScreenSaverStart() {
+        isScreenSaverActive = true
+        pausePolling(setStatus: true)
+    }
+
+    @objc private func handleScreenSaverStop() {
+        isScreenSaverActive = false
+        if isEnabled, !isPollingPaused {
+            startPolling()
+        } else if !isEnabled {
             detectionStatus = .disabled
         }
     }

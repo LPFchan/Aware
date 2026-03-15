@@ -158,10 +158,22 @@ jobs:
 
       - name: Create Release
         run: |
-          gh release create "${GITHUB_REF#refs/tags/}" \
-            build/release/Aware.zip \
-            --title "Aware ${{ github.ref_name }}" \
-            --generate-notes
+          release_tag="${GITHUB_REF#refs/tags/}"
+          release_notes_path="release-notes/${release_tag}.md"
+
+          release_args=(
+            "$release_tag"
+            build/release/Aware.zip
+            --title "Aware ${{ github.ref_name }}"
+          )
+
+          if [[ -f "$release_notes_path" ]]; then
+            release_args+=(--notes-file "$release_notes_path")
+          else
+            release_args+=(--generate-notes)
+          fi
+
+          gh release create "${release_args[@]}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -179,6 +191,7 @@ jobs:
           gh release view "${GITHUB_REF#refs/tags/}" --json body --jq .body > build/release-metadata/Aware.md
           chmod +x scripts/generate-sparkle-appcast.sh
           touch build/appcast-site/.nojekyll
+          export APPCAST_REPLACE_SHORT_VERSION="${GITHUB_REF_NAME#v}"
           scripts/generate-sparkle-appcast.sh \
             build/release/Aware.zip \
             build/appcast-site \

@@ -17,6 +17,7 @@ PROJECT_URL="${PROJECT_URL:-}"
 FULL_RELEASE_NOTES_URL="${FULL_RELEASE_NOTES_URL:-}"
 EXISTING_APPCAST_URL="${EXISTING_APPCAST_URL:-}"
 SPARKLE_PRIVATE_ED_KEY="${SPARKLE_PRIVATE_ED_KEY:-}"
+APPCAST_REPLACE_SHORT_VERSION="${APPCAST_REPLACE_SHORT_VERSION:-}"
 
 if [[ ! -f "$ARCHIVE_PATH" ]]; then
     echo "Archive not found: $ARCHIVE_PATH" >&2
@@ -66,6 +67,29 @@ fi
 
 if [[ -n "$EXISTING_APPCAST_URL" ]]; then
     curl --fail --silent --show-error --location "$EXISTING_APPCAST_URL" -o "$WORK_DIR/appcast.xml" || true
+fi
+
+if [[ -n "$APPCAST_REPLACE_SHORT_VERSION" && -f "$WORK_DIR/appcast.xml" ]]; then
+    /usr/bin/python3 - "$WORK_DIR/appcast.xml" "$APPCAST_REPLACE_SHORT_VERSION" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+
+appcast_path, short_version = sys.argv[1], sys.argv[2]
+sparkle_ns = "http://www.andymatuschak.org/xml-namespaces/sparkle"
+ET.register_namespace("sparkle", sparkle_ns)
+
+tree = ET.parse(appcast_path)
+root = tree.getroot()
+channel = root.find("channel")
+
+if channel is not None:
+    for item in list(channel.findall("item")):
+        short_version_element = item.find(f"{{{sparkle_ns}}}shortVersionString")
+        if short_version_element is not None and short_version_element.text == short_version:
+            channel.remove(item)
+
+tree.write(appcast_path, encoding="utf-8", xml_declaration=False)
+PY
 fi
 
 printf '%s' "$SPARKLE_PRIVATE_ED_KEY" | "$SPARKLE_TOOL_PATH" \
