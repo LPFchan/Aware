@@ -11,12 +11,10 @@ import AVFoundation
 import CoreGraphics
 import ServiceManagement
 
-private let screenSaverDidStartNotification = Notification.Name("com.apple.screensaver.didstart")
-private let screenSaverDidStopNotification = Notification.Name("com.apple.screensaver.didstop")
-
 enum DetectionStatus: String {
     case faceDetected = "Face detected"
     case noFace = "No face"
+    case externalAssertion = "Kept awake by another app"
     case paused = "Paused"
     case disabled = "Disabled"
 }
@@ -45,7 +43,6 @@ final class MenuBarController: NSObject {
     private var pollingTimer: DispatchSourceTimer?
     private let timerQueue = DispatchQueue(label: "com.aware.timer", qos: .userInitiated)
     private var isDisplaySleeping = false
-    private var isScreenSaverActive = false
 
     private(set) var detectionStatus: DetectionStatus = .disabled {
         didSet { updateMenu() }
@@ -198,7 +195,7 @@ final class MenuBarController: NSObject {
     }
 
     private var isPollingPaused: Bool {
-        isDisplaySleeping || isScreenSaverActive
+        isDisplaySleeping
     }
 
     private func registerForPowerStateNotifications() {
@@ -216,21 +213,6 @@ final class MenuBarController: NSObject {
             object: nil
         )
 
-        let distributedCenter = DistributedNotificationCenter.default()
-        distributedCenter.addObserver(
-            self,
-            selector: #selector(handleScreenSaverStart),
-            name: screenSaverDidStartNotification,
-            object: nil,
-            suspensionBehavior: .deliverImmediately
-        )
-        distributedCenter.addObserver(
-            self,
-            selector: #selector(handleScreenSaverStop),
-            name: screenSaverDidStopNotification,
-            object: nil,
-            suspensionBehavior: .deliverImmediately
-        )
     }
 
     private func onEnabledChanged() {
@@ -294,6 +276,15 @@ final class MenuBarController: NSObject {
             return
         }
 
+        // Skip camera check when another app (e.g. browser playing video) is already preventing sleep
+        if externalSleepAssertionIsActive() {
+            DispatchQueue.main.async { [weak self] in
+                _ = self?.sleepAssertion.acquire()
+                self?.detectionStatus = .externalAssertion
+            }
+            return
+        }
+
         presenceDetector.checkForPresence { [weak self] result in
             DispatchQueue.main.async {
                 self?.handleDetectionResult(result)
@@ -338,20 +329,6 @@ final class MenuBarController: NSObject {
         if isEnabled, !isPollingPaused {
             startPolling()
         } else {
-            detectionStatus = .disabled
-        }
-    }
-
-    @objc private func handleScreenSaverStart() {
-        isScreenSaverActive = true
-        pausePolling(setStatus: true)
-    }
-
-    @objc private func handleScreenSaverStop() {
-        isScreenSaverActive = false
-        if isEnabled, !isPollingPaused {
-            startPolling()
-        } else if !isEnabled {
             detectionStatus = .disabled
         }
     }
