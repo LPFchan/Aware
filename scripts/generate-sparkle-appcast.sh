@@ -18,6 +18,8 @@ FULL_RELEASE_NOTES_URL="${FULL_RELEASE_NOTES_URL:-}"
 EXISTING_APPCAST_URL="${EXISTING_APPCAST_URL:-}"
 SPARKLE_PRIVATE_ED_KEY="${SPARKLE_PRIVATE_ED_KEY:-}"
 APPCAST_REPLACE_SHORT_VERSION="${APPCAST_REPLACE_SHORT_VERSION:-}"
+# Set to 0 to omit --embed-release-notes (use localized sparkle:releaseNotesLink on GitHub Pages instead).
+SPARKLE_EMBED_RELEASE_NOTES="${SPARKLE_EMBED_RELEASE_NOTES:-1}"
 
 if [[ ! -f "$ARCHIVE_PATH" ]]; then
     echo "Archive not found: $ARCHIVE_PATH" >&2
@@ -56,13 +58,15 @@ ARCHIVE_STEM="${ARCHIVE_NAME%.*}"
 
 cp "$ARCHIVE_PATH" "$WORK_DIR/$ARCHIVE_NAME"
 
-if [[ -n "$RELEASE_NOTES_PATH" ]]; then
-    if [[ ! -f "$RELEASE_NOTES_PATH" ]]; then
-        echo "Release notes file not found: $RELEASE_NOTES_PATH" >&2
-        exit 1
-    fi
+if [[ "$SPARKLE_EMBED_RELEASE_NOTES" != "0" ]]; then
+    if [[ -n "$RELEASE_NOTES_PATH" ]]; then
+        if [[ ! -f "$RELEASE_NOTES_PATH" ]]; then
+            echo "Release notes file not found: $RELEASE_NOTES_PATH" >&2
+            exit 1
+        fi
 
-    cp "$RELEASE_NOTES_PATH" "$WORK_DIR/$ARCHIVE_STEM.md"
+        cp "$RELEASE_NOTES_PATH" "$WORK_DIR/$ARCHIVE_STEM.md"
+    fi
 fi
 
 if [[ -n "$EXISTING_APPCAST_URL" ]]; then
@@ -92,14 +96,18 @@ tree.write(appcast_path, encoding="utf-8", xml_declaration=False)
 PY
 fi
 
-printf '%s' "$SPARKLE_PRIVATE_ED_KEY" | "$SPARKLE_TOOL_PATH" \
-    --ed-key-file - \
-    --download-url-prefix "$DOWNLOAD_URL_PREFIX" \
-    --link "$PROJECT_URL" \
-    --full-release-notes-url "$FULL_RELEASE_NOTES_URL" \
-    --embed-release-notes \
-    --maximum-deltas 0 \
-    "$WORK_DIR"
+GEN_APP_ARGS=(
+    --ed-key-file -
+    --download-url-prefix "$DOWNLOAD_URL_PREFIX"
+    --link "$PROJECT_URL"
+    --full-release-notes-url "$FULL_RELEASE_NOTES_URL"
+)
+if [[ "$SPARKLE_EMBED_RELEASE_NOTES" != "0" ]]; then
+    GEN_APP_ARGS+=(--embed-release-notes)
+fi
+GEN_APP_ARGS+=(--maximum-deltas 0 "$WORK_DIR")
+
+printf '%s' "$SPARKLE_PRIVATE_ED_KEY" | "$SPARKLE_TOOL_PATH" "${GEN_APP_ARGS[@]}"
 
 mkdir -p "$OUTPUT_DIR"
 cp "$WORK_DIR/appcast.xml" "$OUTPUT_DIR/appcast.xml"

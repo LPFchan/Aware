@@ -1,0 +1,2 @@
+/* Camera privacy — shown in System Settings when the app requests access */
+"NSCameraUsageDescription" = "通过检测您是否在场，在您位于桌边时保持显示器不进入睡眠，需要使用摄像头。";

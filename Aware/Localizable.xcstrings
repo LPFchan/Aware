@@ -1,0 +1,174 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "accessibility.app_name" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Aware" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Aware" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Aware" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Aware" } }
+      }
+    },
+    "alert.camera.body" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Aware needs camera access to detect your presence. Please enable it in System Settings > Privacy & Security > Camera." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "在席を検出するためにカメラへのアクセスが必要です。システム設定 › プライバシーとセキュリティ › カメラで許可してください。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "자리에 있는지 확인하려면 카메라 접근이 필요합니다. 시스템 설정 > 개인정보 보호 및 보안 > 카메라에서 허용해 주세요." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Aware 需要访问摄像头以检测您是否在场。请在“系统设置”>“隐私与安全性”>“摄像头”中允许访问。" } }
+      }
+    },
+    "alert.camera.title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Camera Access Required" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "カメラへのアクセスが必要です" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "카메라 접근 필요" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "需要摄像头访问权限" } }
+      }
+    },
+    "alert.ok" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "확인" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "好" } }
+      }
+    },
+    "detection.disabled" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Disabled" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "オフ" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "꺼짐" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已关闭" } }
+      }
+    },
+    "detection.external_assertion" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Kept awake by another app" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "他のアプリがスリープを防止中" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다른 앱이 화면을 켜 둠" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正由其他应用保持唤醒" } }
+      }
+    },
+    "detection.face_detected" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Face detected" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "顔を検出" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "얼굴 감지됨" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已检测到人脸" } }
+      }
+    },
+    "detection.no_face" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No face" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "顔なし" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "얼굴 없음" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "未检测到人脸" } }
+      }
+    },
+    "detection.paused" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Paused" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "一時停止" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "일시 중지" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已暂停" } }
+      }
+    },
+    "menu.check_for_updates" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Check for Updates…" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "アップデートを確認…" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "업데이트 확인…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "检查更新…" } }
+      }
+    },
+    "menu.enable" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enable" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "オン" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "켜기" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "启用" } }
+      }
+    },
+    "menu.open_at_login" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open at Login" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ログイン時に開く" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그인 시 열기" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "登录时打开" } }
+      }
+    },
+    "menu.polling_interval" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Polling interval" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "検出の間隔" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "감지 간격" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "检测间隔" } }
+      }
+    },
+    "menu.quit" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Quit Aware" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Aware を終了" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Aware 종료" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "退出 Aware" } }
+      }
+    },
+    "menu.status_prefix" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Status: %@" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "状態: %@" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "상태: %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "状态：%@" } }
+      }
+    },
+    "sleep.reason" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Aware: user presence detected" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Aware: ユーザーの在席を検出" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Aware: 사용자 자리 감지됨" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Aware：检测到用户在场" } }
+      }
+    },
+    "tooltip.menu_bar" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Aware — Click to open menu" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Aware — クリックしてメニューを開く" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Aware — 클릭하여 메뉴 열기" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Aware — 点击打开菜单" } }
+      }
+    },
+    "welcome.body" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Aware keeps your display awake by detecting your presence with the FaceTime camera. Click the person icon in the menu bar to enable." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "FaceTime カメラで在席を検出し、ディスプレイがスリープしないようにします。メニューバーの人物アイコンをクリックしてオンにします。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "FaceTime 카메라로 자리에 있는지 감지해 화면이 꺼지지 않게 합니다. 메뉴 막대의 사람 아이콘을 눌러 켜세요." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Aware 使用 FaceTime 摄像头检测您是否在场，从而保持显示器不熄屏。点击菜单栏中的人物图标以启用。" } }
+      }
+    },
+    "welcome.checkbox" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Do not show this window again" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "このウィンドウを再度表示しない" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이 창을 다시 표시하지 않음" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "不再显示此窗口" } }
+      }
+    },
+    "welcome.get_started" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Get Started" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "始める" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "시작하기" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开始使用" } }
+      }
+    },
+    "welcome.title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Welcome to Aware" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Aware へようこそ" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Aware에 오신 것을 환영합니다" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "欢迎使用 Aware" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

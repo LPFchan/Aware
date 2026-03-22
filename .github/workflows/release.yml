@@ -187,15 +187,42 @@ jobs:
           FULL_RELEASE_NOTES_URL: https://github.com/${{ github.repository }}/releases
           PROJECT_URL: https://github.com/${{ github.repository }}
         run: |
-          mkdir -p build/release-metadata build/appcast-site
-          gh release view "${GITHUB_REF#refs/tags/}" --json body --jq .body > build/release-metadata/Aware.md
+          release_tag="${GITHUB_REF#refs/tags/}"
+          pages_base="${{ steps.sparkle_settings.outputs.pages_url }}"
+          mkdir -p build/release-metadata build/appcast-site/release-notes
+          gh release view "$release_tag" --json body --jq .body > build/release-metadata/Aware.md
           chmod +x scripts/generate-sparkle-appcast.sh
           touch build/appcast-site/.nojekyll
+
+          notes_en="release-notes/${release_tag}.md"
+          if [[ -f "$notes_en" ]]; then
+            src_en="$notes_en"
+          else
+            src_en="build/release-metadata/Aware.md"
+          fi
+          python3 scripts/md_to_release_notes_html.py "$src_en" "build/appcast-site/release-notes/${release_tag}.en.html" en
+
+          extra_langs=()
+          for lang in ko ja zh-Hans; do
+            notes_path="release-notes/${release_tag}.${lang}.md"
+            if [[ -f "$notes_path" ]]; then
+              python3 scripts/md_to_release_notes_html.py "$notes_path" "build/appcast-site/release-notes/${release_tag}.${lang}.html" "$lang"
+              extra_langs+=("$lang")
+            fi
+          done
+
           export APPCAST_REPLACE_SHORT_VERSION="${GITHUB_REF_NAME#v}"
+          export SPARKLE_EMBED_RELEASE_NOTES=0
           scripts/generate-sparkle-appcast.sh \
             build/release/Aware.zip \
-            build/appcast-site \
-            build/release-metadata/Aware.md
+            build/appcast-site
+
+          python3 scripts/patch-appcast-localized-release-notes.py \
+            build/appcast-site/appcast.xml \
+            "$pages_base" \
+            "$release_tag" \
+            "${GITHUB_REF_NAME#v}" \
+            "${extra_langs[@]}"
 
       - name: Upload appcast artifact
         if: steps.sparkle_settings.outputs.enabled == 'true'

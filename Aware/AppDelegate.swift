@@ -81,7 +81,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "Welcome to Aware"
+        window.title = String(localized: "welcome.title")
         window.center()
         window.isReleasedWhenClosed = false
         window.level = .floating
@@ -92,12 +92,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         stack.spacing = 8
         stack.edgeInsets = NSEdgeInsets(top: 16, left: 24, bottom: 16, right: 24)
 
-        let title = NSTextField(labelWithString: "Welcome to Aware")
+        let title = NSTextField(labelWithString: String(localized: "welcome.title"))
         title.font = .boldSystemFont(ofSize: 15)
         title.alignment = .center
         stack.addArrangedSubview(title)
 
-        let info = NSTextField(labelWithString: "Aware keeps your display awake by detecting your presence with the FaceTime camera. Click the person icon in the menu bar to enable.")
+        let info = NSTextField(labelWithString: String(localized: "welcome.body"))
         info.font = .systemFont(ofSize: 11)
         info.maximumNumberOfLines = 0
         info.lineBreakMode = .byWordWrapping
@@ -106,10 +106,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         info.preferredMaxLayoutWidth = 260
         stack.addArrangedSubview(info)
 
-        let checkbox = NSButton(checkboxWithTitle: "Do not show this window again", target: nil, action: nil)
+        let checkbox = NSButton(checkboxWithTitle: String(localized: "welcome.checkbox"), target: nil, action: nil)
         stack.addArrangedSubview(checkbox)
 
-        let dismissButton = NSButton(title: "Get Started", target: self, action: #selector(dismissWelcome(_:)))
+        let dismissButton = NSButton(title: String(localized: "welcome.get_started"), target: self, action: #selector(dismissWelcome(_:)))
         dismissButton.bezelStyle = .rounded
         stack.addArrangedSubview(dismissButton)
 

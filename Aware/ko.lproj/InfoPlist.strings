@@ -1,0 +1,2 @@
+/* Camera privacy — shown in System Settings when the app requests access */
+"NSCameraUsageDescription" = "자리에 있는지 확인해 책상에 있을 때 화면이 꺼지지 않도록 하기 위해 카메라를 사용합니다.";

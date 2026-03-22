@@ -1,0 +1,2 @@
+/* Camera privacy — shown in System Settings when the app requests access */
+"NSCameraUsageDescription" = "在席を検出し、デスクにいる間はディスプレイをスリープさせないためにカメラを使用します。";

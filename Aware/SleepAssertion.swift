@@ -5,7 +5,6 @@ import IOKit.pwr_mgt
 /// Wraps IOPMAssertion logic for keeping the display and screensaver timers reset.
 final class SleepAssertion {
     private var assertionID: IOPMAssertionID = 0
-    private let reason = "Aware: user presence detected" as CFString
 
     /// Declares local user activity, resetting both the display-sleep and screensaver idle timers.
     /// Safe to call repeatedly — releases the previous assertion before creating a new one.
@@ -16,6 +15,7 @@ final class SleepAssertion {
             IOPMAssertionRelease(assertionID)
             assertionID = 0
         }
+        let reason = String(localized: "sleep.reason") as CFString
         let result = IOPMAssertionDeclareUserActivity(
             reason,
             kIOPMUserActiveLocal,

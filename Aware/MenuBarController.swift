@@ -11,12 +11,36 @@ import AVFoundation
 import CoreGraphics
 import ServiceManagement
 
-enum DetectionStatus: String {
-    case faceDetected = "Face detected"
-    case noFace = "No face"
-    case externalAssertion = "Kept awake by another app"
-    case paused = "Paused"
-    case disabled = "Disabled"
+private enum MenuItemTag: Int {
+    case statusLine = 1
+    case enable = 2
+    case pollingIntervalParent = 3
+    case checkForUpdates = 4
+    case openAtLogin = 5
+    case quit = 6
+}
+
+enum DetectionStatus {
+    case faceDetected
+    case noFace
+    case externalAssertion
+    case paused
+    case disabled
+
+    var localizedLabel: String {
+        switch self {
+        case .faceDetected:
+            return String(localized: "detection.face_detected")
+        case .noFace:
+            return String(localized: "detection.no_face")
+        case .externalAssertion:
+            return String(localized: "detection.external_assertion")
+        case .paused:
+            return String(localized: "detection.paused")
+        case .disabled:
+            return String(localized: "detection.disabled")
+        }
+    }
 }
 
 enum PollingInterval: Int, CaseIterable {
@@ -95,11 +119,11 @@ final class MenuBarController: NSObject {
             #endif
             return
         }
-        let image = NSImage(systemSymbolName: "person.crop.circle", accessibilityDescription: "Aware")
+        let image = NSImage(systemSymbolName: "person.crop.circle", accessibilityDescription: String(localized: "accessibility.app_name"))
         image?.isTemplate = true  // Ensures proper menu bar tinting
         image?.size = NSSize(width: NSStatusBar.system.thickness, height: NSStatusBar.system.thickness)
         button.image = image
-        button.toolTip = "Aware - Click to open menu"
+        button.toolTip = String(localized: "tooltip.menu_bar")
         statusItem.menu = buildMenu()
         statusItem.isVisible = true
         #if DEBUG
@@ -110,17 +134,19 @@ final class MenuBarController: NSObject {
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
 
-        let statusItem = NSMenuItem(
-            title: "Status: \(detectionStatus.rawValue)",
+        let statusMenuItem = NSMenuItem(
+            title: String(format: String(localized: "menu.status_prefix"), detectionStatus.localizedLabel),
             action: nil,
             keyEquivalent: ""
         )
-        statusItem.isEnabled = false
-        menu.addItem(statusItem)
+        statusMenuItem.tag = MenuItemTag.statusLine.rawValue
+        statusMenuItem.isEnabled = false
+        menu.addItem(statusMenuItem)
         menu.addItem(NSMenuItem.separator())
 
-        let enableItem = NSMenuItem(title: "Enable", action: #selector(toggleEnabled), keyEquivalent: "")
+        let enableItem = NSMenuItem(title: String(localized: "menu.enable"), action: #selector(toggleEnabled), keyEquivalent: "")
         enableItem.target = self
+        enableItem.tag = MenuItemTag.enable.rawValue
         enableItem.state = isEnabled ? .on : .off
         menu.addItem(enableItem)
 
@@ -136,28 +162,32 @@ final class MenuBarController: NSObject {
             item.state = pollingInterval == interval ? .on : .off
             intervalMenu.addItem(item)
         }
-        let intervalParent = NSMenuItem(title: "Polling interval", action: nil, keyEquivalent: "")
+        let intervalParent = NSMenuItem(title: String(localized: "menu.polling_interval"), action: nil, keyEquivalent: "")
+        intervalParent.tag = MenuItemTag.pollingIntervalParent.rawValue
         intervalParent.submenu = intervalMenu
         menu.addItem(intervalParent)
 
         menu.addItem(NSMenuItem.separator())
 
-        let checkForUpdatesItem = NSMenuItem(title: "Check for Updates...", action: checkForUpdatesAction, keyEquivalent: "")
+        let checkForUpdatesItem = NSMenuItem(title: String(localized: "menu.check_for_updates"), action: checkForUpdatesAction, keyEquivalent: "")
         checkForUpdatesItem.target = checkForUpdatesTarget
+        checkForUpdatesItem.tag = MenuItemTag.checkForUpdates.rawValue
         checkForUpdatesItem.isEnabled = checkForUpdatesTarget != nil && checkForUpdatesAction != nil
         menu.addItem(checkForUpdatesItem)
 
         menu.addItem(NSMenuItem.separator())
 
         if #available(macOS 13.0, *) {
-            let openAtLoginItem = NSMenuItem(title: "Open at Login", action: #selector(toggleOpenAtLogin), keyEquivalent: "")
+            let openAtLoginItem = NSMenuItem(title: String(localized: "menu.open_at_login"), action: #selector(toggleOpenAtLogin), keyEquivalent: "")
             openAtLoginItem.target = self
+            openAtLoginItem.tag = MenuItemTag.openAtLogin.rawValue
             openAtLoginItem.state = (SMAppService.mainApp.status == .enabled) ? .on : .off
             menu.addItem(openAtLoginItem)
         }
 
-        let quitItem = NSMenuItem(title: "Quit Aware", action: #selector(quit), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: String(localized: "menu.quit"), action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
+        quitItem.tag = MenuItemTag.quit.rawValue
         menu.addItem(quitItem)
 
         return menu
@@ -165,21 +195,23 @@ final class MenuBarController: NSObject {
 
     private func updateMenu() {
         guard let menu = statusItem.menu else { return }
-        let statusItem = menu.items.first!
-        statusItem.title = "Status: \(detectionStatus.rawValue)"
 
-        if let enableItem = menu.items.first(where: { $0.title == "Enable" }) {
+        if let statusMenuItem = menu.item(withTag: MenuItemTag.statusLine.rawValue) {
+            statusMenuItem.title = String(format: String(localized: "menu.status_prefix"), detectionStatus.localizedLabel)
+        }
+
+        if let enableItem = menu.item(withTag: MenuItemTag.enable.rawValue) {
             enableItem.state = isEnabled ? .on : .off
         }
 
-        if let intervalParent = menu.items.first(where: { $0.title == "Polling interval" }),
+        if let intervalParent = menu.item(withTag: MenuItemTag.pollingIntervalParent.rawValue),
            let submenu = intervalParent.submenu {
             for item in submenu.items {
                 item.state = item.tag == pollingInterval.rawValue ? .on : .off
             }
         }
 
-        if #available(macOS 13.0, *), let openAtLoginItem = menu.items.first(where: { $0.title == "Open at Login" }) {
+        if #available(macOS 13.0, *), let openAtLoginItem = menu.item(withTag: MenuItemTag.openAtLogin.rawValue) {
             openAtLoginItem.state = (SMAppService.mainApp.status == .enabled) ? .on : .off
         }
     }
@@ -312,10 +344,10 @@ final class MenuBarController: NSObject {
 
     private func showCameraDeniedAlert() {
         let alert = NSAlert()
-        alert.messageText = "Camera Access Required"
-        alert.informativeText = "Aware needs camera access to detect your presence. Please enable it in System Settings > Privacy & Security > Camera."
+        alert.messageText = String(localized: "alert.camera.title")
+        alert.informativeText = String(localized: "alert.camera.body")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: String(localized: "alert.ok"))
         alert.runModal()
     }
 

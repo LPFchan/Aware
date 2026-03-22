@@ -27,7 +27,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p build/release build/release-metadata build/appcast-site
+          mkdir -p build/release build/release-metadata build/appcast-site/release-notes
           gh release download "${{ inputs.release_tag }}" --pattern 'Aware.zip' --dir build/release
           gh release view "${{ inputs.release_tag }}" --json body --jq .body > build/release-metadata/Aware.md
 
@@ -39,12 +39,40 @@ jobs:
           FULL_RELEASE_NOTES_URL: https://github.com/${{ github.repository }}/releases
           PROJECT_URL: https://github.com/${{ github.repository }}
         run: |
+          release_tag="${{ inputs.release_tag }}"
+          pages_base="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
           chmod +x scripts/generate-sparkle-appcast.sh
           touch build/appcast-site/.nojekyll
+
+          notes_en="release-notes/${release_tag}.md"
+          if [[ -f "$notes_en" ]]; then
+            src_en="$notes_en"
+          else
+            src_en="build/release-metadata/Aware.md"
+          fi
+          python3 scripts/md_to_release_notes_html.py "$src_en" "build/appcast-site/release-notes/${release_tag}.en.html" en
+
+          extra_langs=()
+          for lang in ko ja zh-Hans; do
+            notes_path="release-notes/${release_tag}.${lang}.md"
+            if [[ -f "$notes_path" ]]; then
+              python3 scripts/md_to_release_notes_html.py "$notes_path" "build/appcast-site/release-notes/${release_tag}.${lang}.html" "$lang"
+              extra_langs+=("$lang")
+            fi
+          done
+
+          export SPARKLE_EMBED_RELEASE_NOTES=0
           scripts/generate-sparkle-appcast.sh \
             build/release/Aware.zip \
-            build/appcast-site \
-            build/release-metadata/Aware.md
+            build/appcast-site
+
+          short_version="${release_tag#v}"
+          python3 scripts/patch-appcast-localized-release-notes.py \
+            build/appcast-site/appcast.xml \
+            "$pages_base" \
+            "$release_tag" \
+            "$short_version" \
+            "${extra_langs[@]}"
 
       - name: Upload appcast artifact
         uses: actions/upload-pages-artifact@v3
