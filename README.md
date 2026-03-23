@@ -15,7 +15,7 @@ A macOS menu bar app that keeps your Mac awake by detecting your presence with t
 
 ## Quick Start
 
-**Download:** [GitHub Releases](https://github.com/LPFchan/Aware/releases) — download `Aware.zip`, unzip, and drag `Aware.app` to Applications.
+**Download:** [GitHub Releases](https://github.com/LPFchan/Aware/releases) — download `Aware.dmg`, open it, and drag `Aware.app` to Applications.
 
 **Build from source:**
 ```bash
@@ -26,7 +26,7 @@ Or double-click **Launch Aware.command** to build and launch in one step.
 
 Grant camera access when prompted, then click the person icon in the menu bar to enable.
 
-**Create a release:** `git tag vX.Y && git push origin vX.Y` — GitHub Actions builds and attaches `Aware.zip`.
+**Create a release:** `git tag vX.Y && git push origin vX.Y` — GitHub Actions builds and attaches `Aware.dmg`.
 
 ## Requirements
 

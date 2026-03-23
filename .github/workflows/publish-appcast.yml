@@ -28,7 +28,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p build/release build/release-metadata build/appcast-site/release-notes
-          gh release download "${{ inputs.release_tag }}" --pattern 'Aware.zip' --dir build/release
+          gh release download "${{ inputs.release_tag }}" --pattern 'Aware.dmg' --dir build/release
           gh release view "${{ inputs.release_tag }}" --json body --jq .body > build/release-metadata/Aware.md
 
       - name: Generate appcast site
@@ -63,7 +63,7 @@ jobs:
 
           export SPARKLE_EMBED_RELEASE_NOTES=0
           scripts/generate-sparkle-appcast.sh \
-            build/release/Aware.zip \
+            build/release/Aware.dmg \
             build/appcast-site
 
           short_version="${release_tag#v}"

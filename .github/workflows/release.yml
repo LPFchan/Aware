@@ -10,30 +10,21 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  DMGMAKER_VERSION: v1.0.3
+
 jobs:
   build:
     runs-on: macos-14
     outputs:
       sparkle_enabled: ${{ steps.sparkle_settings.outputs.enabled }}
-      signing_enabled: ${{ steps.release_settings.outputs.enabled }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Determine optional Apple signing settings
-        id: release_settings
-        env:
-          APPLE_DEVELOPER_ID_CERT_P12: ${{ secrets.APPLE_DEVELOPER_ID_CERT_P12 }}
-          APPLE_DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERT_PASSWORD }}
-          APPLE_DEVELOPER_TEAM_ID: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
-          APPLE_NOTARY_APPLE_ID: ${{ secrets.APPLE_NOTARY_APPLE_ID }}
-          APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
-          APPLE_NOTARY_APP_PASSWORD: ${{ secrets.APPLE_NOTARY_APP_PASSWORD }}
-        run: |
-          if [[ -n "$APPLE_DEVELOPER_ID_CERT_P12" && -n "$APPLE_DEVELOPER_ID_CERT_PASSWORD" && -n "$APPLE_DEVELOPER_TEAM_ID" && -n "$APPLE_NOTARY_APPLE_ID" && -n "$APPLE_NOTARY_APP_PASSWORD" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Select Xcode 16 (Swift 6 for DMGMaker)
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16'
 
       - name: Determine Sparkle publishing settings
         id: sparkle_settings
@@ -53,108 +44,27 @@ jobs:
 
       - name: Prepare release directories
         run: |
-          mkdir -p build/release build/signing
+          mkdir -p build/release
 
-      - name: Import Developer ID certificate
-        if: steps.release_settings.outputs.enabled == 'true'
-        env:
-          APPLE_DEVELOPER_ID_CERT_P12: ${{ secrets.APPLE_DEVELOPER_ID_CERT_P12 }}
-          APPLE_DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERT_PASSWORD }}
-        run: |
-          KEYCHAIN_PATH="$RUNNER_TEMP/aware-signing.keychain-db"
-          KEYCHAIN_PASSWORD="$(uuidgen)"
-          CERT_PATH="$RUNNER_TEMP/developer-id.p12"
-
-          if base64 --help 2>&1 | grep -q -- '--decode'; then
-            printf '%s' "$APPLE_DEVELOPER_ID_CERT_P12" | base64 --decode > "$CERT_PATH"
-          else
-            printf '%s' "$APPLE_DEVELOPER_ID_CERT_P12" | base64 -D > "$CERT_PATH"
-          fi
-
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security default-keychain -s "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security import "$CERT_PATH" -P "$APPLE_DEVELOPER_ID_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security find-identity -v "$KEYCHAIN_PATH"
-
-      - name: Build hobby/private release
-        if: steps.release_settings.outputs.enabled != 'true'
+      - name: Build release
         run: |
           xcodebuild -scheme Aware -configuration Release -derivedDataPath build \
             build -quiet
 
-      - name: Archive Apple-signed release
-        if: steps.release_settings.outputs.enabled == 'true'
-        env:
-          APPLE_DEVELOPER_TEAM_ID: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
+      - name: Create DMG with DMGMaker
         run: |
-          cat > build/signing/ExportOptions.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>developer-id</string>
-              <key>signingStyle</key>
-              <string>automatic</string>
-              <key>teamID</key>
-              <string>${APPLE_DEVELOPER_TEAM_ID}</string>
-          </dict>
-          </plist>
-          EOF
-
-          xcodebuild -scheme Aware -configuration Release \
-            -archivePath build/signing/Aware.xcarchive \
-            DEVELOPMENT_TEAM="$APPLE_DEVELOPER_TEAM_ID" \
-            archive -quiet
-
-          xcodebuild -exportArchive \
-            -archivePath build/signing/Aware.xcarchive \
-            -exportPath build/signing/exported \
-            -exportOptionsPlist build/signing/ExportOptions.plist \
-            -quiet
-
-      - name: Verify signed app
-        if: steps.release_settings.outputs.enabled == 'true'
-        run: |
-          codesign --verify --deep --strict build/signing/exported/Aware.app
-
-      - name: Notarize and staple app
-        if: steps.release_settings.outputs.enabled == 'true'
-        env:
-          APPLE_NOTARY_APPLE_ID: ${{ secrets.APPLE_NOTARY_APPLE_ID }}
-          APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
-          APPLE_DEVELOPER_TEAM_ID: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
-          APPLE_NOTARY_APP_PASSWORD: ${{ secrets.APPLE_NOTARY_APP_PASSWORD }}
-        run: |
-          ditto -c -k --sequesterRsrc --keepParent \
-            build/signing/exported/Aware.app \
-            build/signing/Aware-notary.zip
-
-          xcrun notarytool submit build/signing/Aware-notary.zip \
-            --apple-id "$APPLE_NOTARY_APPLE_ID" \
-            --team-id "${APPLE_NOTARY_TEAM_ID:-$APPLE_DEVELOPER_TEAM_ID}" \
-            --password "$APPLE_NOTARY_APP_PASSWORD" \
-            --wait
-
-          xcrun stapler staple build/signing/exported/Aware.app
-          xcrun stapler validate build/signing/exported/Aware.app
-
-      - name: Package hobby/private update archive
-        if: steps.release_settings.outputs.enabled != 'true'
-        run: |
-          ditto -c -k --sequesterRsrc --keepParent \
-            build/Build/Products/Release/Aware.app \
-            build/release/Aware.zip
-
-      - name: Package Apple-signed update archive
-        if: steps.release_settings.outputs.enabled == 'true'
-        run: |
-          ditto -c -k --sequesterRsrc --keepParent \
-            build/signing/exported/Aware.app \
-            build/release/Aware.zip
+          git clone --depth 1 --branch "$DMGMAKER_VERSION" \
+            https://github.com/saihgupr/DMGMaker.git build/DMGMaker
+          APP_PATH="${GITHUB_WORKSPACE}/build/Build/Products/Release/Aware.app"
+          cd "${GITHUB_WORKSPACE}/build/DMGMaker"
+          swift run -c release "DMG Maker" --app "$APP_PATH" --name "Aware"
+          DMG_SRC="${GITHUB_WORKSPACE}/build/Build/Products/Release/Aware.dmg"
+          if [[ ! -f "$DMG_SRC" ]]; then
+            echo "Expected DMG not found at $DMG_SRC" >&2
+            ls -la "${GITHUB_WORKSPACE}/build/Build/Products/Release/" >&2
+            exit 1
+          fi
+          cp "$DMG_SRC" "${GITHUB_WORKSPACE}/build/release/Aware.dmg"
 
       - name: Create Release
         run: |
@@ -163,7 +73,7 @@ jobs:
 
           release_args=(
             "$release_tag"
-            build/release/Aware.zip
+            build/release/Aware.dmg
             --title "Aware ${{ github.ref_name }}"
           )
 
@@ -214,7 +124,7 @@ jobs:
           export APPCAST_REPLACE_SHORT_VERSION="${GITHUB_REF_NAME#v}"
           export SPARKLE_EMBED_RELEASE_NOTES=0
           scripts/generate-sparkle-appcast.sh \
-            build/release/Aware.zip \
+            build/release/Aware.dmg \
             build/appcast-site
 
           python3 scripts/patch-appcast-localized-release-notes.py \
