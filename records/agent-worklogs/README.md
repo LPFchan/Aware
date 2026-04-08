@@ -13,6 +13,8 @@ Create one file per run or workstream:
 - Worklogs are append-only.
 - If a correction is needed, append a new entry rather than rewriting old history.
 - Do not turn worklogs into decision records or truth docs.
+- Do not create a new `LOG-*` just because a new commit exists.
+- Prefer appending to the current relevant `LOG-*` until a new file would materially improve clarity.
 
 ## Required Opening
 
@@ -30,6 +32,20 @@ Each worklog should begin with:
 - Timestamped entries with actions, files touched, checks run, outputs, blockers, and next steps
 
 Use that structure by default so worklogs stay scan-friendly and comparable across runs.
+
+## When To Reuse vs Create
+
+Append to the current relevant `LOG-*` when:
+
+- the same goal or workstream is continuing
+- the same agent run or bounded task is still active
+- a new timestamped entry is enough to preserve clarity
+
+Create a new `LOG-*` when:
+
+- the task is materially different from the current log's scope
+- a new agent or subagent owns a separate execution thread
+- reusing the old log would make provenance harder to follow
 
 ## Canonical Example
 

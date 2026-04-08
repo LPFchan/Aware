@@ -33,6 +33,7 @@ When writing into a repo surface or artifact directory, read the matching local 
 - Preserve the boundary between `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and `records/agent-worklogs/`.
 - Worker agents should prefer worklogs, evidence, and proposals. The orchestrator or operator owns truth-doc updates unless the operator explicitly allows a different flow.
 - When creating artifacts or commits, follow the stable-ID and provenance rules in `REPO.md`.
+- Prefer appending to the current relevant `LOG-*` instead of creating a new one unless the work is materially distinct or reuse would harm clarity.
 - When hooks or CI are enabled, normal commits must satisfy the provenance checks; bootstrap or migration exceptions must be explicit exceptions only.
 - Prefer the local surface template or directory `README.md` shape over ad hoc formatting when it defines one.
 

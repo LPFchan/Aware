@@ -16,6 +16,7 @@ Use this file as a pointer, not as the canonical product spec.
 - Do not duplicate product truth here; update the canonical repo docs instead.
 - Use stable IDs when creating artifacts: `IBX-*`, `RSH-*`, `DEC-*`, and `LOG-*`.
 - For normal post-bootstrap commits, include commit trailers: `project: aware`, `agent: <agent-id>`, `role: orchestrator|worker|subagent|operator`, and `artifacts: <artifact-id>[, ...]`.
+- For continuing work, prefer updating the current relevant `LOG-*` instead of creating a new one just to support commit provenance.
 - Treat `README.md`, `docs/`, and `release-notes/` as user-facing or release-facing surfaces, not the canonical operating record.
 
 ## Codebase Orientation
