@@ -4,7 +4,7 @@ Use this file as a pointer, not as the canonical product spec.
 
 ## Canonical Docs
 
-- `repo-operating-model.md` defines routing, provenance, and artifact rules.
+- `REPO.md` defines routing, provenance, and artifact rules.
 - `SPEC.md` holds durable product truth.
 - `STATUS.md` holds current operational reality.
 - `PLANS.md` holds accepted future direction only.

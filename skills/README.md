@@ -14,5 +14,4 @@ Use it when the environment supports reusable procedural skills or workflows.
 - `upstream-intake/` is not included because Aware is not currently using the optional upstream-review module.
 
 Keep skills procedural.
-Do not duplicate the canonical rules from `repo-operating-model.md` inside them.
-
+Do not duplicate the canonical rules from `REPO.md` inside them.

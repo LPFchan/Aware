@@ -1,6 +1,6 @@
 # Repo Operating Model
 
-This document is the instruction layer for Aware's repo operating model.
+This document is the canonical repo contract for Aware.
 
 ## Purpose
 
@@ -18,7 +18,9 @@ The goal is simple:
 - Project id: `aware`
 - Canonical user-facing docs remain in `README.md`, `docs/`, and `release-notes/`.
 - Canonical repo-operating docs live in `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and `records/agent-worklogs/`.
-- `AGENTS.md` and `CLAUDE.md` are thin compatibility entrypoints that point back to this file.
+- `AGENTS.md` is the canonical editable agent-instructions entrypoint for tools that require one.
+- `CLAUDE.md` is a thin compatibility shim that points to `AGENTS.md`.
+- `AWARE-AGENT-PROMPT.md` is a legacy bootstrap pointer, not a second policy layer.
 - `upstream-intake/` is intentionally omitted for now. Add it only if Aware later needs recurring upstream review.
 
 ## Core Surfaces

@@ -8,14 +8,14 @@ Do not use it as a transcript or a scratchpad.
 
 - Last updated: `2026-04-09`
 - Overall posture: `active`
-- Current focus: use repo-root entrypoints, local writing guides, and enforced commit provenance to keep future repo changes aligned with repo-template while maintaining the shipping macOS app and release automation
+- Current focus: use repo-root `REPO.md`, local writing guides, and enforced commit provenance to keep future repo changes aligned with repo-template while maintaining the shipping macOS app and release automation
 - Highest-priority blocker: no runtime blocker is currently known; the main risks are unsigned distribution friction and documentation drift
 - Next operator decision needed: whether to widen remote commit-provenance checks beyond default-branch pushes and pull requests once the current workflow has settled
-- Related decisions: `DEC-20260409-001`, `DEC-20260409-002`, `DEC-20260409-003`
+- Related decisions: `DEC-20260409-001`, `DEC-20260409-002`, `DEC-20260409-003`, `DEC-20260409-004`
 
 ## Current State Summary
 
-Aware is a shipping macOS 13+ menu bar app at version `1.4.2` and build `6`. The runtime includes configurable polling, open-at-login support, a welcome window, sleep-assertion handling, localization, and Sparkle updater wiring. GitHub Actions builds on push and pull request; tagged releases build `Aware.dmg`, publish GitHub Releases, and can publish localized Sparkle release notes to GitHub Pages. The repo now also has repo-root `AGENTS.md` and `CLAUDE.md` entrypoints, normalized local writing guides for touched repo artifacts, and tracked commit-provenance enforcement through local hooks plus CI.
+Aware is a shipping macOS 13+ menu bar app at version `1.4.2` and build `6`. The runtime includes configurable polling, open-at-login support, a welcome window, sleep-assertion handling, localization, and Sparkle updater wiring. GitHub Actions builds on push and pull request; tagged releases build `Aware.dmg`, publish GitHub Releases, and can publish localized Sparkle release notes to GitHub Pages. The repo now also has repo-root `REPO.md`, `AGENTS.md`, and `CLAUDE.md` entrypoints, normalized local writing guides for touched repo artifacts, and tracked commit-provenance enforcement through local hooks plus CI.
 
 ## Active Phases Or Tracks
 
@@ -35,11 +35,11 @@ Aware is a shipping macOS 13+ menu bar app at version `1.4.2` and build `6`. The
 - Goal: keep repo docs and future agent work aligned with repo-template surfaces and local writing guides
 - Status: `in progress`
 - Why this matters now: the repo now has canonical docs, but consistency depends on tools and humans using the entrypoints and local guides on future edits
-- Current work: repo-root `AGENTS.md` and `CLAUDE.md` now enforce the writing contract, and touched guides have been normalized toward repo-template
+- Current work: repo-root `REPO.md`, `AGENTS.md`, and `CLAUDE.md` now enforce the writing contract, and touched guides have been normalized toward repo-template naming and structure
 - Exit criteria: future normal work consistently uses the correct surface, stable IDs, and local guide without ad hoc document shapes
 - Dependencies: operator and agents following the entrypoints and local guides
 - Risks: legacy docs and one-off edits can still drift if contributors bypass the repo-root entrypoints or local guides
-- Related ids: `DEC-20260409-001`, `DEC-20260409-002`, `LOG-20260409-001`, `LOG-20260409-002`
+- Related ids: `DEC-20260409-001`, `DEC-20260409-002`, `DEC-20260409-004`, `LOG-20260409-001`, `LOG-20260409-002`, `LOG-20260409-004`
 
 ### Commit Provenance Enforcement
 
@@ -54,6 +54,10 @@ Aware is a shipping macOS 13+ menu bar app at version `1.4.2` and build `6`. The
 
 ## Recent Changes To Project Reality
 
+- Date: `2026-04-09`
+  - Change: migrated the canonical repo contract to repo-root `REPO.md` and repointed active guidance surfaces to the new canonical path
+  - Why it matters: repo-template naming is now current in the repo without losing Aware-specific operating rules or append-only historical records
+  - Related ids: `DEC-20260409-004`, `LOG-20260409-004`
 - Date: `2026-04-09`
   - Change: added tracked commit-provenance enforcement through `.githooks/commit-msg`, validator scripts, install helper, and CI checks on pull requests plus default-branch pushes
   - Why it matters: normal commits now have both local and remote enforcement for the required provenance trailers

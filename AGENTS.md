@@ -2,11 +2,12 @@
 
 This repo uses repo-template.
 
-Treat `AGENTS.md` as a compatibility entrypoint for tools that look for repo-level agent instructions. The canonical rules live in `repo-operating-model.md`.
+Treat `AGENTS.md` as the canonical editable agent-instructions file for the repo.
+It should enforce repo behavior while deferring canonical policy details to `REPO.md`.
 
 ## Read First
 
-- `repo-operating-model.md`
+- `REPO.md`
 - `SPEC.md`
 - `STATUS.md`
 - `PLANS.md`
@@ -28,10 +29,10 @@ When writing into a repo surface or artifact directory, read the matching local 
 ## Operating Rules
 
 - Keep durable truth in repo files, not only in chat.
-- Route work using the routing ladder in `repo-operating-model.md`.
+- Route work using the routing ladder in `REPO.md`.
 - Preserve the boundary between `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and `records/agent-worklogs/`.
 - Worker agents should prefer worklogs, evidence, and proposals. The orchestrator or operator owns truth-doc updates unless the operator explicitly allows a different flow.
-- When creating artifacts or commits, follow the stable-ID and provenance rules in `repo-operating-model.md`.
+- When creating artifacts or commits, follow the stable-ID and provenance rules in `REPO.md`.
 - When hooks or CI are enabled, normal commits must satisfy the provenance checks; bootstrap or migration exceptions must be explicit exceptions only.
 - Prefer the local surface template or directory `README.md` shape over ad hoc formatting when it defines one.
 

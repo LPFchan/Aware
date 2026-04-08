@@ -76,7 +76,7 @@ Add examples and writing rules so agents stop inventing document structure from 
 ## Entry 2026-04-09 10-55-00 KST
 
 - Action: updated writing rules so local guides are treated as part of the artifact contract
-- Files touched: `repo-operating-model.md`, `scaffold/README.md`, `scaffold/AGENTS.md`, `scaffold/CLAUDE.md`
+- Files touched: `REPO.md`, `AGENTS.md`, `CLAUDE.md`, and the touched local directory guides
 - Checks run: `rg -n "example\\.md|Repo Template|repo-template" .`
 - Output: naming normalized and writing guidance tightened
 - Blockers: none
