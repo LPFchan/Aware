@@ -43,3 +43,12 @@ Introduce repo-root `AGENTS.md` and `CLAUDE.md`, then normalize the touched repo
 - Output: `git diff --check` passed and the new entrypoints, local guide contract, and related IDs were confirmed in the normalized docs
 - Blockers: none
 - Next: use the entrypoints and local guides on the next touched repo artifact
+
+## Entry 2026-04-09 07-15-37 KST
+
+- Action: converted `CLAUDE.md` from a repo-specific instruction file into a pure shim that points back to `AGENTS.md`, matching the repo-template scaffold shape
+- Files touched: `CLAUDE.md`, `records/agent-worklogs/LOG-20260409-002-normalize-repo-template-docs.md`
+- Checks run: `git diff -- CLAUDE.md`
+- Output: `CLAUDE.md` is now a compatibility shim and `AGENTS.md` remains the single repo-specific instruction entrypoint
+- Blockers: none
+- Next: commit and push the shim update with provenance tied to `DEC-20260409-002` and `LOG-20260409-002`
