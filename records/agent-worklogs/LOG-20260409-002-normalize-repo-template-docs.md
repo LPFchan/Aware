@@ -52,3 +52,12 @@ Introduce repo-root `AGENTS.md` and `CLAUDE.md`, then normalize the touched repo
 - Output: `CLAUDE.md` is now a compatibility shim and `AGENTS.md` remains the single repo-specific instruction entrypoint
 - Blockers: none
 - Next: commit and push the shim update with provenance tied to `DEC-20260409-002` and `LOG-20260409-002`
+
+## Entry 2026-04-09 17-35-24 KST
+
+- Action: reconciled `SPEC.md` and the research guide against pre-adoption Aware docs, the current runtime, and the current lightweight repo-template guidance
+- Files touched: `SPEC.md`, `research/README.md`, `records/agent-worklogs/LOG-20260409-002-normalize-repo-template-docs.md`
+- Checks run: `git log --follow -- SPEC.md`, `git log --follow -- research/README.md`, `git show cd6ae1c^:README.md`, `git show cd6ae1c^:AWARE-AGENT-PROMPT.md`, `git show cd6ae1c:SPEC.md`, current `sed -n` reads of `Aware/PresenceDetector.swift`, `Aware/MenuBarController.swift`, `Aware/SleepAssertion.swift`, `Aware/AppDelegate.swift`, and `docs/SPARKLE_SETUP.md`, `git diff --check`, targeted `rg` for old rigid headings and stale implementation facts
+- Output: replaced the generic spec outline with an Aware-native durable spec, preserved current accepted facts from the source tree, restored durable privacy/capture/detection contracts from the pre-adoption README and agent prompt where still current, and relaxed `research/README.md` to the current memo-oriented guidance because this repo has no `RSH-*` memos yet
+- Blockers: none
+- Next: hand off the reconciled docs and call out old-source facts that were intentionally not restored because they conflict with current runtime
