@@ -1,7 +1,7 @@
 ---
 name: repo-orchestrator
 description: "Route work into the correct artifact layer in Aware's repo operating model."
-argument-hint: "Task, intake item, or maintenance request"
+argument-hint: "Task, capture item, or maintenance request"
 ---
 
 # Repo Orchestrator
@@ -22,14 +22,14 @@ Use this skill with:
 ## What This Skill Produces
 
 - correctly routed repo artifacts
-- clear separation between truth, plans, research, decisions, worklogs, and inbox intake
+- clear separation between truth, plans, research, decisions, worklogs, and inbox capture
 - stable IDs plus lightweight provenance
 - operator escalation only when a real judgment call exists
 
 ## Procedure
 
 1. Classify the work in routing order.
-   - Is this untriaged intake?
+   - Is this untriaged capture?
    - Is this durable truth?
    - Is this current operational reality?
    - Is this accepted future direction?
@@ -57,6 +57,8 @@ Use this skill with:
 4. Write the artifact with provenance.
    - Include `Opened: YYYY-MM-DD HH-mm-ss KST`
    - Include `Recorded by agent: <agent-id>`
+   - Before drafting, read the destination directory's `README.md` and any explicit template.
+   - Match the local guide when it is prescriptive, and stay lightweight when the guide is intentionally minimal.
 
 5. Preserve the separation rules.
    - Do not write speculation straight into `PLANS.md`.
@@ -68,6 +70,8 @@ Use this skill with:
    - Example: `RSH-*` plus `LOG-*`
    - Example: `DEC-*` plus `PLANS.md`
    - Example: `LOG-*` plus `STATUS.md`
+   - Touch multiple layers only when each touched layer has a distinct job.
+   - Do not mirror the same evolving thought into every artifact type.
 
 7. If Git commits are created, add commit trailers.
    - `project: aware`
@@ -75,6 +79,11 @@ Use this skill with:
    - `role: orchestrator|worker|subagent|operator`
    - `artifacts: <artifact-id>[, ...]`
    - Prefer referencing and updating an existing relevant `LOG-*` before creating a new one.
+
+8. If the task is daily inbox pressure review, cluster and triage capture before routing it.
+   - Do not summarize every inbox item by default.
+   - Promote only survived triage.
+   - Leave low-signal ideas in held/discarded counts or clusters instead of expanding them into plans.
 
 ## Escalation Triggers
 
@@ -89,6 +98,7 @@ Escalate instead of guessing when the work:
 ## Quality Bar
 
 - clear routing
+- sparse promotion
 - clear provenance
 - clean separation of layers
-- reusable artifacts instead of chat-only outcomes
+- reusable artifacts instead of external-tool-only outcomes

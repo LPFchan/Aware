@@ -61,3 +61,21 @@ Introduce repo-root `AGENTS.md` and `CLAUDE.md`, then normalize the touched repo
 - Output: replaced the generic spec outline with an Aware-native durable spec, preserved current accepted facts from the source tree, restored durable privacy/capture/detection contracts from the pre-adoption README and agent prompt where still current, and relaxed `research/README.md` to the current memo-oriented guidance because this repo has no `RSH-*` memos yet
 - Blockers: none
 - Next: hand off the reconciled docs and call out old-source facts that were intentionally not restored because they conflict with current runtime
+
+## Entry 2026-04-09 20-23-25 KST
+
+- Action: adopted repo-template's sparse promotion discipline and capture packet vocabulary in Aware's live operating-policy surfaces
+- Files touched: `REPO.md`, `AGENTS.md`, `INBOX.md`, `AWARE-AGENT-PROMPT.md`, `skills/repo-orchestrator/SKILL.md`, `records/agent-worklogs/LOG-20260409-002-normalize-repo-template-docs.md`
+- Checks run: live-policy `rg` scans for old `messenger`, `chat`, `raw message`, `intake span`, and `Active Intake` vocabulary; live-policy `rg` scan for new capture / capture packet / promotion discipline vocabulary; `git diff --check`; targeted verbatim-block check for imported repo-template text
+- Output: replaced live generic intake/messenger/chat wording with current capture vocabulary, added capture-packet, inbox-pressure, and sparse-promotion policy, aligned the inbox skeleton's generic labels, and kept `upstream-intake/` omitted because Aware still has no upstream-review module
+- Blockers: none
+- Next: summarize the targeted policy adoption, preserved local adaptations, and checks run
+
+## Entry 2026-04-09 20-35-32 KST
+
+- Action: migrated Aware to repo-template's mandatory repo-native skills layer
+- Files touched: `REPO.md`, `AGENTS.md`, `AWARE-AGENT-PROMPT.md`, `skills/README.md`, `skills/daily-inbox-pressure-review/SKILL.md`, `records/agent-worklogs/LOG-20260409-002-normalize-repo-template-docs.md`
+- Checks run: root-skill Markdown link validation, stale optional-skills wording scan, `test ! -e scaffold`, root `skills/` inventory
+- Output: kept `skills/` at the adopted repo root, made `skills/README.md`, `skills/repo-orchestrator/SKILL.md`, and `skills/daily-inbox-pressure-review/SKILL.md` the required baseline, documented skills as repo-native procedures, and continued omitting `skills/upstream-intake/` because Aware does not use `upstream-intake/`
+- Blockers: none
+- Next: run final link, stale wording, vocabulary, and diff hygiene checks

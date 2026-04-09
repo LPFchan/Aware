@@ -8,8 +8,9 @@ Use this file as a pointer, not as the canonical product spec.
 - `SPEC.md` holds durable product truth.
 - `STATUS.md` holds current operational reality.
 - `PLANS.md` holds accepted future direction only.
-- `INBOX.md` is the scratch surface for untriaged intake.
+- `INBOX.md` is the scratch surface for untriaged capture.
 - `records/decisions/` and `records/agent-worklogs/` store durable decisions and execution history.
+- `skills/README.md` and `skills/<name>/SKILL.md` store required repo-native procedures.
 
 ## Working Rules
 
