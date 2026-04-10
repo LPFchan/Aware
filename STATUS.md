@@ -55,7 +55,7 @@ Aware is a shipping macOS 13+ menu bar app at version `1.4.2` and build `6`. The
 ## Recent Changes To Project Reality
 
 - Date: `2026-04-10`
-  - Change: migrated the repo operating model, skills layer, and active agent guidance to commit-backed execution history while the legacy markdown worklog surface is being retired
+  - Change: migrated the repo operating model, skills layer, and active agent guidance to commit-backed execution history while retiring the legacy markdown worklog surface
   - Why it matters: execution history now lives in git commits with structured provenance instead of a separate markdown file layer
   - Related ids: `DEC-20260409-001`, `DEC-20260409-002`, `DEC-20260409-003`, `DEC-20260409-004`, `DEC-20260409-005`
 - Date: `2026-04-09`
