@@ -225,7 +225,7 @@ validate_body() {
 check_primary_id_uniqueness() {
   primary_id=$1
   refs=""
-  head_sha=$(git -C "$repo_root" rev-parse -q --verify HEAD 2>/dev/null || true)
+  target_sha=${CHECK_COMMIT_STANDARDS_IGNORE_SHA:-$(git -C "$repo_root" rev-parse -q --verify HEAD 2>/dev/null || true)}
 
   current_ref=$(git -C "$repo_root" symbolic-ref -q --short HEAD 2>/dev/null || true)
   default_ref=$(default_branch_ref || true)
@@ -246,7 +246,7 @@ check_primary_id_uniqueness() {
 
     for existing_id in $(extract_commit_ids_from_value "$existing_value"); do
       if [ "$existing_id" = "$primary_id" ]; then
-        if [ -n "$head_sha" ] && [ "$sha" = "$head_sha" ]; then
+        if [ -n "$target_sha" ] && [ "$sha" = "$target_sha" ]; then
           continue
         fi
         fail "primary \`commit:\` id already exists in history: $primary_id"
