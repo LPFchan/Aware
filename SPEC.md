@@ -81,7 +81,7 @@ Aware also observes external assertions. If another process is already preventin
 - `Aware/SleepAssertion.swift`: wraps IOKit user-activity declaration and external sleep-assertion detection.
 - `Aware/AppDelegate.swift`: configures accessory activation, optional Sparkle updater, menu-bar controller, and first-run welcome window.
 - `.github/workflows/`, `docs/`, and `release-notes/`: build, release, Sparkle/appcast publishing, and operator-facing release documentation.
-- `REPO.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and `records/agent-worklogs/`: repo operating-model surfaces; keep process truth there instead of mixing it into the product spec.
+- `REPO.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and git commit history via `commit: LOG-*`: repo operating-model surfaces; keep process truth there instead of mixing it into the product spec.
 
 ## Distribution And Updates
 

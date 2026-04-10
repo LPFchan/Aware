@@ -10,7 +10,7 @@ Each reusable workflow should live at `skills/<name>/SKILL.md`.
 ## Required Baseline Skills
 
 - `repo-orchestrator/`
-  - Routes work into `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and `records/agent-worklogs/`.
+  - Generic routing workflow for truth, status, plans, research, decisions, commit-backed execution, and inbox capture.
 - `daily-inbox-pressure-review/`
   - Focus-protecting daily triage for `IBX-*` capture and capture packets.
 
@@ -18,7 +18,7 @@ Each reusable workflow should live at `skills/<name>/SKILL.md`.
 
 - `upstream-intake/`
   - Companion workflow for the optional upstream-review module.
-  - Omitted because Aware is not currently using the optional upstream-review module.
+  - Omitted because Aware does not currently track upstream.
 
 Keep skills procedural.
 Do not duplicate the canonical rules from `REPO.md` inside them.

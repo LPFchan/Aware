@@ -19,7 +19,7 @@ Do not put raw brainstorms or untriaged intake here.
 - Expected value: document drift decreases over time while repo-specific truth and history remain intact.
 - Preconditions: read the matching local guide before editing and preserve existing IDs, dates, decisions, and historical facts.
 - Earliest likely start: `2026-04-09`
-- Related ids: `DEC-20260409-002`, `LOG-20260409-002`
+- Related ids: `DEC-20260409-002`
 
 ## Sequencing
 
@@ -28,7 +28,7 @@ Do not put raw brainstorms or untriaged intake here.
 - Initiative: use `AGENTS.md`, `CLAUDE.md`, and the matching local guide on each future repo-doc edit
   - Why now: the enforcement entrypoints and writing guides now exist, but they only help if future edits use them
   - Dependencies: `REPO.md`, `AGENTS.md`, `CLAUDE.md`, and the local surface guides
-  - Related ids: `DEC-20260409-002`, `DEC-20260409-004`, `LOG-20260409-002`, `LOG-20260409-004`
+  - Related ids: `DEC-20260409-002`, `DEC-20260409-004`
 
 ### Mid Term
 

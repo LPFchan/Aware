@@ -17,7 +17,7 @@ The goal is simple:
 
 - Project id: `aware`
 - Canonical user-facing docs remain in `README.md`, `docs/`, and `release-notes/`.
-- Canonical repo-operating docs live in `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and `records/agent-worklogs/`.
+- Canonical repo-operating docs live in `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and git commit history via `commit: LOG-*`.
 - Canonical repo procedures live in `skills/`.
 - `AGENTS.md` is the canonical editable agent-instructions entrypoint for tools that require one.
 - `CLAUDE.md` is a thin compatibility shim that points to `AGENTS.md`.
@@ -36,7 +36,7 @@ Every repo using this system should separate these surfaces:
 | `INBOX.md` | Ephemeral capture waiting for triage. | append then purge |
 | `research/` | Curated research memos worth keeping. | append by new file |
 | `records/decisions/` | Durable decision records with rationale. | append-only by new file |
-| `records/agent-worklogs/` | Execution history for runs, agents, and subagents. | append-only |
+| `git commit history` | Canonical execution history through structured commit-backed `LOG-*` records. | append-only by new commit |
 | `skills/` | Required procedural workflows for repeatable agent tasks. | edit by skill |
 
 ## Agent Compatibility Files
@@ -64,6 +64,27 @@ Recommended split:
 - `skills/<name>/SKILL.md`
   - procedure for one repeatable workflow
 
+## Artifact Writing Discipline
+
+Macro structure is not enough on its own. Agents should not improvise document shape when the repo already defines one.
+
+When writing repo files or commit-backed execution records:
+
+- read the nearest canonical surface, directory `README.md`, and any explicit template before drafting
+- if the local `README.md` includes a default shape or canonical example, follow it by default
+- use the established section order only when the surface actually defines one and it helps the repo stay legible
+- write normalized repo records, not external transcripts or stream-of-consciousness notes
+- keep facts, decisions, open questions, and next steps clearly separated
+- summarize evidence and outcomes instead of pasting raw command output unless the literal output is the artifact
+- prefer short declarative bullets or paragraphs over vague filler
+
+When a directory exists to store a durable artifact type, it should ideally include:
+
+- a `README.md` that explains what belongs there
+- a default shape or canonical example inside that same `README.md` when that artifact type benefits from it
+
+That single guide helps future agents copy a house style instead of inventing one.
+
 ## Separation Rules
 
 These boundaries are mandatory:
@@ -73,7 +94,7 @@ These boundaries are mandatory:
 - `PLANS.md` is not a brainstorm dump.
 - `INBOX.md` is not durable truth.
 - `research/` is not raw execution history.
-- `records/decisions/` is not the same as `records/agent-worklogs/`.
+- `records/decisions/` is not the same as commit-backed execution history.
 - Off-Git memory is not a substitute for repo-local canonical docs.
 
 That separation gives future operators and future agents fast answers to different questions:
@@ -83,7 +104,7 @@ That separation gives future operators and future agents fast answers to differe
 - What future work is actually accepted? -> `PLANS.md`
 - What did we learn from exploration? -> `research/`
 - What did we decide and why? -> `records/decisions/`
-- What actually happened during execution? -> `records/agent-worklogs/`
+- What actually happened during execution? -> git commit history via `commit: LOG-*`
 
 ## Roles
 
@@ -103,7 +124,7 @@ It may:
 - update `SPEC.md`, `STATUS.md`, and `PLANS.md`
 - create research memos
 - create decision records
-- append to the current relevant worklog or create a new one when the work is materially distinct
+- create compliant commit-backed execution records
 - translate external capture into repo artifacts
 - escalate non-obvious product, architecture, workflow, or policy calls
 
@@ -113,9 +134,9 @@ Worker agents execute bounded tasks.
 
 They may:
 
-- append to worklogs
+- produce evidence, summaries, and implementation outputs
+- create compliant commit-backed execution records when granted commit authority
 - propose truth changes through the orchestrator
-- create evidence, summaries, and implementation outputs
 
 They should not update `SPEC.md`, `STATUS.md`, or `PLANS.md` directly unless the operator explicitly allows that flow.
 
@@ -195,11 +216,11 @@ Use each layer for its distinct job:
   - concise durable product or system truth after the argument is settled
 - `STATUS.md`
   - current operational reality
-- `records/agent-worklogs/`
-  - execution history, not truth, decision, plan, or research mirrors
+- git commit history via `commit: LOG-*`
+  - canonical execution history, not truth, decision, plan, or research mirrors
 
 A research memo may remain research forever.
-A decision record should exist only when a real product, architecture, workflow, trust, upstream, or repo-operating choice has been made.
+A decision record should exist only when a real product, architecture, workflow, trust, or repo-operating choice has been made.
 `SPEC.md`, `STATUS.md`, and `PLANS.md` should receive concise outcomes, not copied debate.
 
 One task may touch multiple layers, but each touched layer must have its own distinct job.
@@ -220,17 +241,17 @@ When new work arrives, the orchestrator should classify it in this order:
    - Route to `research/`.
 6. Is this a meaningful decision with rationale?
    - Route to `records/decisions/`.
-7. Is this execution history?
-   - Route to `records/agent-worklogs/`.
+7. Is this implementation or execution that should land in git history?
+   - Route to a compliant commit-backed `LOG-*` record.
 
 One task may legitimately touch multiple layers. For example:
 
-- a research session can create `RSH-*` plus an updated or new `LOG-*`
+- a research session can create `RSH-*` plus a committed `LOG-*`
 - a product choice can create `DEC-*` and update `PLANS.md`
-- implementation progress can append to an existing relevant `LOG-*` and update `STATUS.md`
+- implementation progress can create a committed `LOG-*` and update `STATUS.md`
 
 Touch multiple layers only when each layer receives distinct information.
-Do not copy the same evolving thought into research, decision, plan, spec, status, upstream, and log surfaces.
+Do not copy the same evolving thought into research, decision, plan, spec, status, or execution surfaces.
 
 ## Write Rules
 
@@ -239,84 +260,130 @@ Do not copy the same evolving thought into research, decision, plan, spec, statu
 - Daily inbox review should reduce pressure by clustering, routing, holding, or purging capture; it should not generate a larger digest by default.
 - `research/` keeps curated findings only.
 - `records/decisions/` is append-only by new decision file.
-- `records/agent-worklogs/` is append-only by appended entries or, when clarity requires it, a new log file.
+- Routine execution history lives in git commit history through commit-backed `LOG-*` records.
+- Do not invent a parallel execution-history file layer.
+- If work produces no durable repo change, route only the durable outcome that belongs elsewhere or keep the raw trace Off-Git.
 - Truth docs should reflect the latest accepted state, not every intermediate thought.
-
-### Worklog Reuse Policy
-
-Do not create a new `LOG-*` just to satisfy provenance.
-
-Append to the latest relevant `LOG-*` when:
-
-- the same workstream, goal, or blocker is still in scope
-- the new work is part of the same execution thread
-- an additional entry preserves clarity
-
-Create a new `LOG-*` only when:
-
-- the work is a distinct new stream or bounded task
-- a new agent or subagent is doing materially separate execution
-- the prior log would become confusing, bloated, or misleading if reused
-- the new work deserves its own execution record for future retrieval
-
-## Local Writing Guides
-
-- Before editing a repo document, read the matching surface template or local directory `README.md` first.
-- When a local guide defines scope, default section order, or a canonical example, treat that guide as part of the artifact contract.
-- Prefer the local guide over ad hoc formatting and make the smallest justified deviation when repo-specific truth needs extra structure.
 
 ## Stable IDs
 
 This model assumes:
 
-- `project-id` identifies the repo or workspace. For Aware, use `aware`.
-- `agent-id` identifies one conversation or run, 1:1.
+- `project-id` identifies the repo or workspace
+- `agent-id` identifies the conversation or actor lineage that originated the artifact or commit
 - subagents receive their own `agent-id`
-- Off-Git systems resolve parent-child lineage, messages, events, and commit history from `agent-id`
+- Off-Git systems resolve runs, child lineage, messages, events, and commit history from `agent-id`
 
 Recommended prefixes:
 
 - `IBX-YYYYMMDD-NNN`
 - `RSH-YYYYMMDD-NNN`
 - `DEC-YYYYMMDD-NNN`
-- `LOG-YYYYMMDD-NNN`
+- `LOG-YYYYMMDD-HHMMSS-<agent-suffix>`
 
-Numbering is per day and per artifact type. Any agent may claim the next ID by checking the least available `NNN`.
+File-backed artifact numbering is per day and per artifact type. Any agent may claim the next file-backed `NNN` by checking the least available value.
 
-Every stable-ID-bearing artifact should open with:
+File-backed stable-ID-bearing artifacts should open with:
 
 - `Opened: YYYY-MM-DD HH-mm-ss KST`
 - `Recorded by agent: <agent-id>`
 
-## Commit Provenance
+Commit-backed `LOG-*` ids use this format:
 
-After this repo adopts the system, every normal commit should include these trailers:
+- `LOG-YYYYMMDD-HHMMSS-<agent-suffix>`
+- `<agent-suffix>` is the last up to 6 lowercase alphanumeric characters of the normalized `agent:` value
+- normalize `agent:` by lowercasing it and removing non-alphanumeric characters
 
-- `project: aware`
+When claiming a new `LOG-*` id:
+
+- start from the current KST timestamp plus the derived agent suffix
+- scan the current branch and the default branch for existing `commit:` values
+- if the candidate id already exists, bump the timestamp forward by one second until it is unique
+
+## Commit-Backed Execution Records
+
+After a repo adopts this system, every commit should include these trailers:
+
+- `project: <project-id>`
 - `agent: <agent-id>`
 - `role: orchestrator|worker|subagent|operator`
+- `commit: LOG-...[, LOG-...]`
+
+Optional trailer:
+
 - `artifacts: <artifact-id>[, <artifact-id>...]`
 
 Rules:
 
+- `commit:` must include one or more `LOG-*` ids, comma-separated.
+- The first `LOG-*` in `commit:` is the commit's primary execution id.
+- Additional `LOG-*` ids mean the landed commit canonically absorbs earlier execution records whose separate commits will not remain separate landed history.
+- Every merge commit must mint its own primary `LOG-*`.
+- When child commits remain visible as landed history, mention child `LOG-*` ids in `notes:` instead of reusing them in `commit:`.
+- `--amend` and `rebase` should preserve existing `LOG-*` ids.
+- If cherry-pick relocates work and the original commit will not also land, keep the same primary `LOG-*`.
+- If both original and cherry-picked commits could land, the later commit must mint a new primary `LOG-*`; source `LOG-*` ids may be mentioned only in `notes:`.
+- If a collision is discovered before landing, the later branch renumbers before merge.
+- `artifacts:` is optional.
 - `artifacts:` may list more than one stable ID, comma-separated.
-- A normal commit should always reference at least one relevant artifact, newly created or updated.
-- Artifact-less commits should be treated as bootstrap or migration exceptions only.
+- `artifacts:` must not include any `LOG-*`.
 - The commit side and the repo-artifact side should reinforce the same provenance graph.
 
-Normal commits do not require a brand-new `LOG-*`.
+Commit bodies must use this lowercase structure:
 
-- Prefer appending to an existing relevant `LOG-*` when the same workstream is continuing.
-- Create a new `LOG-*` only when it improves clarity.
-- Commits may reference `LOG-*`, `DEC-*`, `RSH-*`, or another relevant artifact type as appropriate.
+```text
+<subject line>
 
-Local enforcement surfaces:
+timestamp: YYYY-MM-DD HH-mm-ss KST
+changes:
+- ...
+rationale:
+- ...
+checks:
+- ...
+notes:
+- ...
 
-- `.githooks/commit-msg`
-- `scripts/check-commit-standards.sh`
-- `scripts/check-commit-range.sh`
-- `scripts/install-hooks.sh`
-- `.github/workflows/commit-standards.yml`
+project: <project-id>
+agent: <agent-id>
+role: orchestrator|worker|subagent|operator
+commit: LOG-...
+artifacts: DEC-..., RSH-...
+```
+
+Body rules:
+
+- the subject line must be non-empty
+- `timestamp:` is required and must be one line in KST
+- `changes:`, `rationale:`, and `checks:` are required
+- each required section must contain at least one `- ...` item
+- `checks:` may be `- none`
+- `notes:` is optional
+
+## Commit-Time Enforcement
+
+If the repo enables commit hooks, every attempted commit should be checked against these provenance rules.
+
+Recommended minimum enforcement:
+
+- reject commits that do not include `project:`, `agent:`, `role:`, and `commit:`
+- reject roles outside `orchestrator|worker|subagent|operator`
+- reject malformed `commit:` values
+- reject malformed or empty `artifacts:` values when present
+- reject any `artifacts:` value that includes `LOG-*`
+- reject commits that do not include the required body keys and list items
+- reject duplicate `LOG-*` ids on the current branch or default branch
+- allow explicit bootstrap or migration exceptions
+
+The goal is not perfect policy automation. The goal is to stop obviously non-compliant commits before they land.
+
+Best practice is to use both:
+
+- local git hooks for fast feedback before the commit is created
+- CI for remote re-validation on push or pull request
+
+Every landed commit on the default branch must satisfy the same contract regardless of whether it came from the CLI, a merge queue, a bot, or a web UI.
+If a landing path cannot produce compliant commit messages, the repo should not use that landing path.
 
 ## Off-Git Provenance
 
@@ -324,23 +391,15 @@ Repo artifacts stay lightweight on purpose.
 
 In-repo provenance answers:
 
-- what artifact this is
+- what file-backed artifact this is
 - when it was opened
-- which agent wrote the record
+- which agent recorded it
+- which `LOG-*` execution ids belong to each commit
 
 The Off-Git runtime should answer:
 
-- which conversation or run the `agent-id` maps to
+- which conversation or actor lineage the `agent-id` maps to
+- which exact run inside that lineage produced the commit or artifact
 - whether the agent was top-level or a subagent
 - which source events produced the artifact
-- which commits belong to that `agent-id`
-
-## Scaffold Rule
-
-This repo uses the repo-template skeleton as a canonical layout, not a loose grab-bag of snippets.
-
-Keep the operating surfaces recognizable so future operators and agents can recover context quickly.
-
-In repo-template source, scaffold files live under `scaffold/`.
-After adoption, the scaffold contents belong at the target repo root.
-For example, `scaffold/skills/repo-orchestrator/SKILL.md` becomes `skills/repo-orchestrator/SKILL.md` in the adopted repo.
+- how execution lineage maps across rebases, cherry-picks, merges, and absorbed `LOG-*` ids
