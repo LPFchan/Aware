@@ -1,10 +1,10 @@
 # Repo Operating Model
 
-This document is the canonical repo contract for Aware.
+This document is the canonical repo contract for repo-template-style repos.
 
 ## Purpose
 
-Use this model when the repo is managed by one operator plus many agents and you want the repo itself to remain legible over time.
+Use this model when a repo is managed by one operator plus many agents and you want the repo itself to remain legible over time.
 
 The goal is simple:
 
@@ -13,16 +13,7 @@ The goal is simple:
 - keep provenance explicit
 - let the orchestrator route work without inventing new storage rules each time
 
-## Aware Conventions
-
-- Project id: `aware`
-- Canonical user-facing docs remain in `README.md`, `docs/`, and `release-notes/`.
-- Canonical repo-operating docs live in `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, and git commit history via `commit: LOG-*`.
-- Canonical repo procedures live in `skills/`.
-- `AGENTS.md` is the canonical editable agent-instructions entrypoint for tools that require one.
-- `CLAUDE.md` is a thin compatibility shim that points to `AGENTS.md`.
-- `AWARE-AGENT-PROMPT.md` is a legacy bootstrap pointer, not a second policy layer.
-- `upstream-intake/` is intentionally omitted for now. Add it only if Aware later needs recurring upstream review.
+This file is part of the ready-to-copy scaffold for adopted repos.
 
 ## Core Surfaces
 
@@ -38,6 +29,7 @@ Every repo using this system should separate these surfaces:
 | `records/decisions/` | Durable decision records with rationale. | append-only by new file |
 | `git commit history` | Canonical execution history through structured commit-backed `LOG-*` records. | append-only by new commit |
 | `skills/` | Required procedural workflows for repeatable agent tasks. | edit by skill |
+| `upstream-intake/` | Optional upstream review subsystem for repos that track an upstream. | append by cadence |
 
 ## Agent Compatibility Files
 
@@ -216,11 +208,13 @@ Use each layer for its distinct job:
   - concise durable product or system truth after the argument is settled
 - `STATUS.md`
   - current operational reality
+- `upstream-intake/`
+  - upstream review, upstream conflict, carry-forward, and operator escalation for upstream-related choices
 - git commit history via `commit: LOG-*`
   - canonical execution history, not truth, decision, plan, or research mirrors
 
 A research memo may remain research forever.
-A decision record should exist only when a real product, architecture, workflow, trust, or repo-operating choice has been made.
+A decision record should exist only when a real product, architecture, workflow, trust, upstream, or repo-operating choice has been made.
 `SPEC.md`, `STATUS.md`, and `PLANS.md` should receive concise outcomes, not copied debate.
 
 One task may touch multiple layers, but each touched layer must have its own distinct job.
@@ -231,17 +225,19 @@ When new work arrives, the orchestrator should classify it in this order:
 
 1. Is this untriaged capture?
    - Route to `INBOX.md`.
-2. Is this durable truth about what the project is?
+2. Is this recurring upstream review?
+   - Route to `upstream-intake/`.
+3. Is this durable truth about what the project is?
    - Route to `SPEC.md`.
-3. Is this current operational reality?
+4. Is this current operational reality?
    - Route to `STATUS.md`.
-4. Is this accepted future direction?
+5. Is this accepted future direction?
    - Route to `PLANS.md`.
-5. Is this reusable exploration or horizon-expansion work?
+6. Is this reusable exploration or horizon-expansion work?
    - Route to `research/`.
-6. Is this a meaningful decision with rationale?
+7. Is this a meaningful decision with rationale?
    - Route to `records/decisions/`.
-7. Is this implementation or execution that should land in git history?
+8. Is this implementation or execution that should land in git history?
    - Route to a compliant commit-backed `LOG-*` record.
 
 One task may legitimately touch multiple layers. For example:
@@ -251,7 +247,7 @@ One task may legitimately touch multiple layers. For example:
 - implementation progress can create a committed `LOG-*` and update `STATUS.md`
 
 Touch multiple layers only when each layer receives distinct information.
-Do not copy the same evolving thought into research, decision, plan, spec, status, or execution surfaces.
+Do not copy the same evolving thought into research, decision, plan, spec, status, upstream, and execution surfaces.
 
 ## Write Rules
 
@@ -263,6 +259,7 @@ Do not copy the same evolving thought into research, decision, plan, spec, statu
 - Routine execution history lives in git commit history through commit-backed `LOG-*` records.
 - Do not invent a parallel execution-history file layer.
 - If work produces no durable repo change, route only the durable outcome that belongs elsewhere or keep the raw trace Off-Git.
+- `upstream-intake/` should preserve its own paired internal-record and operator-brief workflow.
 - Truth docs should reflect the latest accepted state, not every intermediate thought.
 
 ## Stable IDs
@@ -280,6 +277,7 @@ Recommended prefixes:
 - `RSH-YYYYMMDD-NNN`
 - `DEC-YYYYMMDD-NNN`
 - `LOG-YYYYMMDD-HHMMSS-<agent-suffix>`
+- `UPS-YYYYMMDD-NNN`
 
 File-backed artifact numbering is per day and per artifact type. Any agent may claim the next file-backed `NNN` by checking the least available value.
 
@@ -362,9 +360,9 @@ Body rules:
 
 ## Commit-Time Enforcement
 
-If the repo enables commit hooks, every attempted commit should be checked against these provenance rules.
+Repos using this system must enforce these provenance rules both locally and remotely.
 
-Recommended minimum enforcement:
+Required minimum enforcement:
 
 - reject commits that do not include `project:`, `agent:`, `role:`, and `commit:`
 - reject roles outside `orchestrator|worker|subagent|operator`
@@ -377,7 +375,7 @@ Recommended minimum enforcement:
 
 The goal is not perfect policy automation. The goal is to stop obviously non-compliant commits before they land.
 
-Best practice is to use both:
+Required enforcement layers:
 
 - local git hooks for fast feedback before the commit is created
 - CI for remote re-validation on push or pull request
@@ -403,3 +401,19 @@ The Off-Git runtime should answer:
 - whether the agent was top-level or a subagent
 - which source events produced the artifact
 - how execution lineage maps across rebases, cherry-picks, merges, and absorbed `LOG-*` ids
+
+## Scaffold Rule
+
+`scaffold/` is a ready-to-copy repo skeleton, not a loose library of files to cherry-pick casually.
+
+Use it when you want a managed repo to share one canonical layout so humans and agents know exactly where work belongs.
+
+In this template, scaffold files live under `scaffold/`.
+After adoption, the scaffold contents belong at the target repo root.
+For example, `scaffold/skills/repo-orchestrator/SKILL.md` becomes `skills/repo-orchestrator/SKILL.md` in the adopted repo.
+
+## Local Divergence
+
+- Project id: `aware`
+- `upstream-intake/` is intentionally omitted in Aware until the repo adopts recurring upstream review.
+- `AWARE-AGENT-PROMPT.md` remains a legacy bootstrap pointer for this repo.

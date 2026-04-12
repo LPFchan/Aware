@@ -10,11 +10,6 @@ Use this skill with:
 
 - [../../REPO.md](../../REPO.md)
 
-## Local Conventions
-
-- Project id: `aware`
-- `upstream-intake/` is not present in this repo right now; do not route work there unless the module is explicitly added later.
-
 ## What This Skill Produces
 
 - correctly routed repo artifacts
@@ -42,12 +37,14 @@ Use this skill with:
    - `research/`
    - `records/decisions/`
    - git commit history via `commit: LOG-*`
+   - `upstream-intake/`
 
 3. Assign stable IDs when needed.
    - `IBX-*`
    - `RSH-*`
    - `DEC-*`
    - `LOG-*`
+   - `UPS-*`
    - Use the least available `NNN` for file-backed artifact types.
    - For `LOG-*`, derive the suffix from `agent:`, start from the current KST second, and bump forward until unique on the current branch plus default branch.
 
@@ -75,10 +72,12 @@ Use this skill with:
    - `role: orchestrator|worker|subagent|operator`
    - `commit: LOG-...[, LOG-...]`
    - `artifacts:` is optional and must not contain `LOG-*`
-   - If commit hooks are enabled, make the commit message pass the local validator before retrying.
+   - Make the commit message pass the required local validator before retrying.
    - Use the structured body keys `timestamp:`, `changes:`, `rationale:`, and `checks:` with `notes:` optional.
 
-8. If the task is daily inbox pressure review, cluster and triage capture before routing it.
+8. If the task is recurring upstream maintenance and the optional module is enabled, use `upstream-intake/` instead of inventing a parallel workflow.
+
+9. If the task is daily inbox pressure review, cluster and triage capture before routing it.
    - Do not summarize every inbox item by default.
    - Promote only survived triage.
    - Leave low-signal ideas in held/discarded counts or clusters instead of expanding them into plans.

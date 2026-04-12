@@ -16,16 +16,7 @@ It should enforce repo behavior while deferring canonical policy details to `REP
 
 Before running a repeatable repo workflow, read the relevant `skills/<name>/SKILL.md`. Treat skills as repo-native procedures even when the agent runtime does not auto-load them.
 
-When writing into a file-backed artifact directory, read that directory's `README.md` first. If it includes a prescriptive shape, follow it. If it is intentionally lightweight, keep the output lightweight too. For commit-backed execution records, follow `REPO.md` and the commit validator instead of inventing a file guide.
-
-## Repo-Specific Notes
-
-- Build verification: `xcodebuild -scheme Aware -configuration Debug -derivedDataPath build build`
-- Commit provenance setup: `scripts/install-hooks.sh` configures the tracked `commit-msg` hook locally.
-- Commit provenance checks: `scripts/check-commit-standards.sh <commit-message-file>` and `scripts/check-commit-range.sh <base> <head>`
-- There is no dedicated automated test suite in the repo today. For runtime changes, use the build plus focused manual validation.
-- Preserve the product and workflow constraints in `SPEC.md`: menu bar-only UX, local presence detection, no telemetry or analytics, and safe failure when camera access is denied or unavailable.
-- `AWARE-AGENT-PROMPT.md` is a legacy bootstrap helper. Do not treat it as a second policy layer.
+When writing into an artifact directory, read that directory's `README.md` first. If it includes a prescriptive shape, follow it. If it is intentionally lightweight, keep the output lightweight too.
 
 ## Operating Rules
 
@@ -34,11 +25,14 @@ When writing into a file-backed artifact directory, read that directory's `READM
 - Preserve the boundary between `SPEC.md`, `STATUS.md`, `PLANS.md`, `INBOX.md`, `research/`, `records/decisions/`, commit-backed execution history, and `upstream-intake/`.
 - Worker agents should prefer evidence, proposals, and compliant commit-backed execution records. The orchestrator or operator owns truth-doc updates unless the operator explicitly allows a different flow.
 - Treat `INBOX.md` as pressure, not a backlog. During inbox review, cluster capture and promote only survived triage.
-- Promote sparsely. Do not mirror one evolving thought into research, decisions, plans, spec, status, or execution records.
+- Promote sparsely. Do not mirror one evolving thought into research, decisions, plans, spec, status, upstream records, and execution records.
+- If the repo tracks upstream on a cadence, use `upstream-intake/` instead of inventing a parallel workflow.
 - When creating artifacts or commits, follow the stable-ID and provenance rules in `REPO.md`.
-- Use `skills/<name>/SKILL.md` for repeatable repo procedures instead of copying one-off instructions into repo-wide policy.
-- If hooks or CI are enabled, normal commits must satisfy the provenance checks; bootstrap or migration exceptions must be explicit exceptions only.
-- Prefer the local surface template or directory `README.md` shape over ad hoc formatting when it defines one.
+- Prefer the local `README.md` shape over ad hoc formatting when it defines one.
+- Your commit message must satisfy the local repo provenance check before the commit is allowed.
+- Your pushed commits must satisfy the same provenance rules remotely in CI.
+- Treat each committed change as a canonical execution record through `commit: LOG-*`.
+- Normal commits must use the structured body keys `timestamp:`, `changes:`, `rationale:`, and `checks:` with `notes:` optional.
 
 ## Enforcement
 
@@ -61,3 +55,13 @@ When you write or update repo artifacts, adherence to the repo's ruleset is requ
 - Keep them procedural.
 - Do not duplicate canonical repo policy inside them.
 - Use them to standardize repeatable tasks, escalation triggers, and output shape.
+
+## Local Divergence
+
+- Build verification: `xcodebuild -scheme Aware -configuration Debug -derivedDataPath build build`
+- Commit provenance setup: `scripts/install-hooks.sh` configures the tracked `commit-msg` hook locally.
+- Commit provenance checks: `scripts/check-commit-standards.sh <commit-message-file>` and `scripts/check-commit-range.sh <base> <head>`
+- There is no dedicated automated test suite in the repo today. For runtime changes, use the build plus focused manual validation.
+- Preserve the product and workflow constraints in `SPEC.md`: menu bar-only UX, local presence detection, no telemetry or analytics, and safe failure when camera access is denied or unavailable.
+- `AWARE-AGENT-PROMPT.md` is a legacy bootstrap helper. Do not treat it as a second policy layer.
+- `upstream-intake/` is omitted in Aware because the repo does not currently track upstream review.
