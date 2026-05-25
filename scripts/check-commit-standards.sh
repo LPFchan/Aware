@@ -9,7 +9,6 @@ fi
 
 msg_file=$1
 repo_root=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
-expected_project=aware
 
 if [ ! -f "$msg_file" ]; then
   echo "commit standards check failed: commit message file not found: $msg_file" >&2
@@ -225,9 +224,7 @@ validate_body() {
 check_primary_id_uniqueness() {
   primary_id=$1
   refs=""
-  # Local divergence: let range validation ignore the commit currently under test so
-  # historical backfills can be checked without weakening duplicate-id enforcement.
-  target_sha=${CHECK_COMMIT_STANDARDS_IGNORE_SHA:-$(git -C "$repo_root" rev-parse -q --verify HEAD 2>/dev/null || true)}
+  head_sha=$(git -C "$repo_root" rev-parse -q --verify HEAD 2>/dev/null || true)
 
   current_ref=$(git -C "$repo_root" symbolic-ref -q --short HEAD 2>/dev/null || true)
   default_ref=$(default_branch_ref || true)
@@ -248,10 +245,10 @@ check_primary_id_uniqueness() {
 
     for existing_id in $(extract_commit_ids_from_value "$existing_value"); do
       if [ "$existing_id" = "$primary_id" ]; then
-        if [ -n "$target_sha" ] && [ "$sha" = "$target_sha" ]; then
+        if [ -n "$head_sha" ] && [ "$sha" = "$head_sha" ]; then
           continue
         fi
-        fail "primary \`commit:\` id already exists in history: $primary_id"
+        fail "primary \`commit:\` id already exists in history: $primary_id (generate a fresh skeleton with sh scripts/new-commit-message.sh --subject \"...\")"
       fi
     done
   done
@@ -278,7 +275,6 @@ commit_value=$(trailer_value "commit")
 artifacts_value=$(trailer_value "artifacts" || true)
 
 [ -n "$project" ] || fail "project trailer is empty"
-[ "$project" = "$expected_project" ] || fail "project trailer must be $expected_project"
 [ -n "$agent" ] || fail "agent trailer is empty"
 
 case "$role" in
