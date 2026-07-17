@@ -7,3 +7,4 @@ xcuserdata/
 
 # macOS
 .DS_Store
+.tmp_commit_msg_*.txt
