@@ -1,4 +1,3 @@
-<!-- template-managed:begin -->
 # Agent Instructions
 
 `AGENTS.md` is the canonical editable agent-instructions file. It enforces repo behavior while deferring canonical policy to `records/REPO.md`.
@@ -45,8 +44,18 @@ Repo-agnostic skills (`sharpen-the-tip`, `prototype-mode`, `housekeeping`, `proa
 - Do not write chatty transcripts where the repo expects normalized records.
 - Do not bypass commit provenance checks unless the commit is an explicit bootstrap or migration exception.
 
+## Local Divergence
+
+- Build verification: `xcodebuild -scheme Aware -configuration Debug -derivedDataPath build build`
+- PermissionFlow comes from upstream jaywcjlove/PermissionFlow, pinned to v2.11.2, and requires Xcode 26+ to resolve (its manifest uses `swift-tools-version: 6.2`). The old LPFchan/PermissionFlow fork exists for reference: it carried a `@Sendable` fix in `SettingsNavigator` without which apps built with Xcode 16's SDK crash opening System Settings. If the build ever drops back to Xcode 16, restore the fork or re-apply that fix.
+- Commit provenance setup: `scripts/install-hooks.sh` configures the tracked `commit-msg` hook locally.
+- Commit provenance checks: `scripts/check-commit-standards.sh <commit-message-file>` and `scripts/check-commit-range.sh <base> <head>`
+- There is no dedicated automated test suite in the repo today. For runtime changes, use the build plus focused manual validation.
+- Preserve the product and workflow constraints in `SPEC.md`: menu bar-only UX, local presence detection, no telemetry or analytics, and safe failure when camera access is denied or unavailable.
+- `AWARE-AGENT-PROMPT.md` is a legacy bootstrap helper. Do not treat it as a second policy layer.
+- `upstream-intake/` is omitted in Aware because the repo does not currently track upstream review.
+
 ## Code Review Rules
 
 - Before reporting a commit as missing required provenance fields, verify against the exact commit messages as they exist on GitHub. If the fields are present, do not claim they are missing.
 - The provenance contract is defined in `records/REPO.md` and enforced by `scripts/new-commit-message.sh`. Cite the specific field that is missing and the rule it violates; do not review commits against an assumed format.
-<!-- template-managed:end -->
