@@ -359,10 +359,10 @@
 		};
 		F5A6B7C80001 /* XCRemoteSwiftPackageReference "PermissionFlow" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jaywcjlove/PermissionFlow";
+			repositoryURL = "https://github.com/LPFchan/PermissionFlow";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.11.2;
+				kind = exactVersion;
+				version = "2.11.2-swift6.1";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
