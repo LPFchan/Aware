@@ -15,13 +15,13 @@ env:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     outputs:
       sparkle_enabled: ${{ steps.sparkle_settings.outputs.enabled }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 16 (Swift 6 for DMGMaker)
+      - name: Select Xcode 16 (Swift 6 for DMGMaker, 6.1 for PermissionFlow)
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '16'
