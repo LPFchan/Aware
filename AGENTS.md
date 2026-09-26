@@ -47,6 +47,7 @@ Repo-agnostic skills (`sharpen-the-tip`, `prototype-mode`, `housekeeping`, `proa
 ## Local Divergence
 
 - Build verification: `xcodebuild -scheme Aware -configuration Debug -derivedDataPath build build`
+- PermissionFlow (pinned from 2.11.2) declares `swift-tools-version: 6.2`, so resolving packages requires Xcode 26+ (SwiftPM >= 6.2). Xcode 16.x cannot resolve it, even with the swift.org 6.2 toolchain selected via `TOOLCHAINS`.
 - Commit provenance setup: `scripts/install-hooks.sh` configures the tracked `commit-msg` hook locally.
 - Commit provenance checks: `scripts/check-commit-standards.sh <commit-message-file>` and `scripts/check-commit-range.sh <base> <head>`
 - There is no dedicated automated test suite in the repo today. For runtime changes, use the build plus focused manual validation.

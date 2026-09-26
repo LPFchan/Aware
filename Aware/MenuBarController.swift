@@ -9,6 +9,8 @@
 import AppKit
 import AVFoundation
 import CoreGraphics
+import PermissionFlow
+import PermissionFlowCameraStatus
 import ServiceManagement
 
 private enum MenuItemTag: Int {
@@ -63,6 +65,9 @@ final class MenuBarController: NSObject {
     private let sleepAssertion = SleepAssertion()
     private let checkForUpdatesTarget: AnyObject?
     private let checkForUpdatesAction: Selector?
+    /// Opens the System Settings camera pane when access has been denied.
+    /// Created lazily on the main actor, where menu actions and alerts run.
+    private var permissionController: PermissionFlowController?
 
     private var pollingTimer: DispatchSourceTimer?
     private let timerQueue = DispatchQueue(label: "com.aware.timer", qos: .userInitiated)
@@ -93,6 +98,9 @@ final class MenuBarController: NSObject {
         self.checkForUpdatesTarget = checkForUpdatesTarget
         self.checkForUpdatesAction = checkForUpdatesAction
         super.init()
+        MainActor.assumeIsolated {
+            PermissionFlowCameraStatus.register()
+        }
         #if DEBUG
         debugLog("MenuBarController init started")
         #endif
@@ -349,6 +357,14 @@ final class MenuBarController: NSObject {
         alert.alertStyle = .warning
         alert.addButton(withTitle: String(localized: "alert.ok"))
         alert.runModal()
+        // Camera uses the system toggle list (no drag panel), so this just
+        // opens System Settings > Privacy & Security > Camera.
+        MainActor.assumeIsolated {
+            if permissionController == nil {
+                permissionController = PermissionFlow.makeController()
+            }
+            permissionController?.authorize(pane: .camera)
+        }
     }
 
     @objc private func handleDisplaySleep() {
@@ -369,20 +385,18 @@ final class MenuBarController: NSObject {
         if isEnabled {
             isEnabled = false
         } else {
-            let status = AVCaptureDevice.authorizationStatus(for: .video)
-            switch status {
-            case .authorized:
+            let cameraPermission = CameraPermissionStatusProvider()
+            if cameraPermission.authorizationState() == .granted {
                 isEnabled = true
-            case .notDetermined:
-                AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+            } else if AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined {
+                // System prompt via PermissionFlow's camera status provider.
+                cameraPermission.requestAuthorization { [weak self] state in
                     DispatchQueue.main.async {
-                        self?.isEnabled = granted
+                        self?.isEnabled = (state == .granted)
                     }
                 }
-            case .denied, .restricted:
+            } else {
                 showCameraDeniedAlert()
-            @unknown default:
-                break
             }
         }
     }

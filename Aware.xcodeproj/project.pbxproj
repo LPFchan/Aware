@@ -18,6 +18,8 @@
 		A1B2C3D40003 /* PresenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10003 /* PresenceDetector.swift */; };
 		A1B2C3D40004 /* SleepAssertion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D10004 /* SleepAssertion.swift */; };
 		E1F2A3B40000 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E1F2A3B40002 /* Sparkle */; };
+		F5A6B7C80004 /* PermissionFlow in Frameworks */ = {isa = PBXBuildFile; productRef = F5A6B7C80002 /* PermissionFlow */; };
+		F5A6B7C80005 /* PermissionFlowCameraStatus in Frameworks */ = {isa = PBXBuildFile; productRef = F5A6B7C80003 /* PermissionFlowCameraStatus */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +43,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1F2A3B40000 /* Sparkle in Frameworks */,
+				F5A6B7C80004 /* PermissionFlow in Frameworks */,
+				F5A6B7C80005 /* PermissionFlowCameraStatus in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,6 +127,8 @@
 			name = Aware;
 			packageProductDependencies = (
 				E1F2A3B40002 /* Sparkle */,
+				F5A6B7C80002 /* PermissionFlow */,
+				F5A6B7C80003 /* PermissionFlowCameraStatus */,
 			);
 			productName = Aware;
 			productReference = A1B2C3D00001 /* Aware.app */;
@@ -157,6 +163,7 @@
 			mainGroup = A1B2C3D30001;
 			packageReferences = (
 				E1F2A3B40001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				F5A6B7C80001 /* XCRemoteSwiftPackageReference "PermissionFlow" */,
 			);
 			productRefGroup = A1B2C3D30003 /* Products */;
 			projectDirPath = "";
@@ -350,6 +357,14 @@
 				minimumVersion = 2.7.0;
 			};
 		};
+		F5A6B7C80001 /* XCRemoteSwiftPackageReference "PermissionFlow" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jaywcjlove/PermissionFlow";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.11.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -357,6 +372,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E1F2A3B40001 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		F5A6B7C80002 /* PermissionFlow */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F5A6B7C80001 /* XCRemoteSwiftPackageReference "PermissionFlow" */;
+			productName = PermissionFlow;
+		};
+		F5A6B7C80003 /* PermissionFlowCameraStatus */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F5A6B7C80001 /* XCRemoteSwiftPackageReference "PermissionFlow" */;
+			productName = PermissionFlowCameraStatus;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
