@@ -15,7 +15,7 @@ env:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     outputs:
       sparkle_enabled: ${{ steps.sparkle_settings.outputs.enabled }}
     steps:
