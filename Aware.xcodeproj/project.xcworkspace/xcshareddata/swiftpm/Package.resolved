@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LPFchan/PermissionFlow",
       "state" : {
-        "revision" : "4ceff2a83937f4c039fc4cf1b31eb18587c38459",
-        "version" : "2.11.2-swift6.1"
+        "revision" : "9ac6e773bf21df8693d7a93f7e0775e8db2a6db6",
+        "version" : "2.11.2-swift6.1.1"
       }
     },
     {

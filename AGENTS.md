@@ -47,7 +47,7 @@ Repo-agnostic skills (`sharpen-the-tip`, `prototype-mode`, `housekeeping`, `proa
 ## Local Divergence
 
 - Build verification: `xcodebuild -scheme Aware -configuration Debug -derivedDataPath build build`
-- PermissionFlow comes from the LPFchan/PermissionFlow fork, pinned to `2.11.2-swift6.1`: upstream v2.11.2 with `swift-tools-version` lowered to 6.1 so Xcode 16.3+ can build it. Move to a new fork tag when upstream updates.
+- PermissionFlow comes from the LPFchan/PermissionFlow fork, pinned to `2.11.2-swift6.1.1`: upstream v2.11.2 with two changes. `swift-tools-version` is lowered to 6.1 so Xcode 16.3+ can build it, and `SettingsNavigator`'s `openApplication` completion is marked `@Sendable`; without that, apps built with Xcode 16's SDK crash every time they open System Settings. When moving to a new upstream tag, carry both changes forward unless building with Xcode 26+, where neither is needed.
 - Commit provenance setup: `scripts/install-hooks.sh` configures the tracked `commit-msg` hook locally.
 - Commit provenance checks: `scripts/check-commit-standards.sh <commit-message-file>` and `scripts/check-commit-range.sh <base> <head>`
 - There is no dedicated automated test suite in the repo today. For runtime changes, use the build plus focused manual validation.
