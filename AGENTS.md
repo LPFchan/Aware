@@ -54,3 +54,8 @@ Repo-agnostic skills (`sharpen-the-tip`, `prototype-mode`, `housekeeping`, `proa
 - Preserve the product and workflow constraints in `SPEC.md`: menu bar-only UX, local presence detection, no telemetry or analytics, and safe failure when camera access is denied or unavailable.
 - `AWARE-AGENT-PROMPT.md` is a legacy bootstrap helper. Do not treat it as a second policy layer.
 - `upstream-intake/` is omitted in Aware because the repo does not currently track upstream review.
+
+## Code Review Rules
+
+- Before reporting a commit as missing required provenance fields, verify against the exact commit messages as they exist on GitHub. If the fields are present, do not claim they are missing.
+- The provenance contract is defined in `records/REPO.md` and enforced by `scripts/new-commit-message.sh`. Cite the specific field that is missing and the rule it violates; do not review commits against an assumed format.
