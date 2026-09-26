@@ -1,13 +1,13 @@
 {
-  "originHash" : "af57ec271e51d6743d8d5de17d0378c5c593331081bd3c110c5ca46764ecc95b",
+  "originHash" : "8545bb74948975b3cfec42d80d499dcc86f5a1014cba74c9e2c97a21fa9d4227",
   "pins" : [
     {
       "identity" : "permissionflow",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/LPFchan/PermissionFlow",
+      "location" : "https://github.com/jaywcjlove/PermissionFlow",
       "state" : {
-        "revision" : "9ac6e773bf21df8693d7a93f7e0775e8db2a6db6",
-        "version" : "2.11.2-swift6.1.1"
+        "revision" : "2f2a4b76b1eb2ff7ab815b977be8229853f10bf8",
+        "version" : "2.11.2"
       }
     },
     {
