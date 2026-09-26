@@ -61,5 +61,3 @@ Repo-agnostic skills (`sharpen-the-tip`, `prototype-mode`, `housekeeping`, `proa
 - Preserve the product and workflow constraints in `SPEC.md`: menu bar-only UX, local presence detection, no telemetry or analytics, and safe failure when camera access is denied or unavailable.
 - `AWARE-AGENT-PROMPT.md` is a legacy bootstrap helper. Do not treat it as a second policy layer.
 - `upstream-intake/` is omitted in Aware because the repo does not currently track upstream review.
-TAILOFEOF'MARKER
-git diff --stat
