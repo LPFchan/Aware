@@ -58,6 +58,6 @@ Repo-agnostic skills (`sharpen-the-tip`, `prototype-mode`, `housekeeping`, `proa
 - Commit provenance setup: `scripts/install-hooks.sh` configures the tracked `commit-msg` hook locally.
 - Commit provenance checks: `scripts/check-commit-standards.sh <commit-message-file>` and `scripts/check-commit-range.sh <base> <head>`
 - There is no dedicated automated test suite in the repo today. For runtime changes, use the build plus focused manual validation.
-- Preserve the product and workflow constraints in `SPEC.md`: menu bar-only UX, local presence detection, no telemetry or analytics, and safe failure when camera access is denied or unavailable.
+- Preserve the product and workflow constraints in `records/SPEC.md`: menu bar-only UX, local presence detection, no telemetry or analytics, and safe failure when camera access is denied or unavailable.
 - `AWARE-AGENT-PROMPT.md` is a legacy bootstrap helper. Do not treat it as a second policy layer.
 - `upstream-intake/` is omitted in Aware because the repo does not currently track upstream review.
